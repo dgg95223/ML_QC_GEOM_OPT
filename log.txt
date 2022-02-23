@@ -1,0 +1,16 @@
+1/31 12:57 pm
+All modules have been implemented, main class need to be finalized.
+data_manage.py can be renamed as i/o.py
+Currently, the whole i/o flow is as followed:
+    1. Read molecule from xyz file.
+    2. Dump the molecule information to the format which the qc_engine requires.
+    3. Read/get the qc results and dump to the format which the ml_engine requires.
+    4. Use ml_engine output for optimization with ASE optimizer. Read/get molecule 
+    information to ASE Atom object.
+    5. Dump the optimized geometry to the initial xyz file.(append)
+    6. Go back to step 1 and start the loop.
+
+To be done:
+The all i/o operation can be wrapped in one file.
+
+############################################################################################
