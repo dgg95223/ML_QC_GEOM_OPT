@@ -1,8 +1,9 @@
 #'''This code is the main frame of the interface.'''
 from QC_engine import QCEngine
+from ML_engine import MLEngine
 import numpy as np
 
-class MLgeomopt(self):
+class MLgeomopt():
 	def __init__(self):
 		if self.consistensy_tol is None:
 			self.consistensy_tol = 0.000001
@@ -10,14 +11,14 @@ class MLgeomopt(self):
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy
 		return consistensy_met
 
-	def kernel(self):
-		E_QC, G_QC = QCEngine(molecule, engine).calc_new()
+	def kernel(self, workpath, molecule, qcengine, mlengine):
+		E_QC, G_QC = QCEngine(molecule, qcengine).calc_new()
 
 		consistensy = False
 		iter = 0
 		while consistensy is not True and iter < self.max_cycle:
-			MLEngine().add_geom()
-			MLEngine().training()
+			MLEngine(workpath, mlengine).add_geom()
+			MLEngine(workpath, mlengine).training()
 			E_ML = MLEngine().calc_new()
 			consistensy = self.check_consistensy(E_ML, E_QC)
 			iter += 1
