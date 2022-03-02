@@ -7,10 +7,17 @@ from io import read_xyz
 
 class QCEngine(object): 
     def __init__(self, qc_engine=None, xyz_path=None, **setting):
+<<<<<<< HEAD
         assert qc_engine is not None, 'Please specify which QC engine to be used.'
         assert xyz_path is not None, 'Please specify the path of xyz file'
         assert setting is not None, 'Please specify the input setting of QC engine'
         
+=======
+        assert qc_engine is not None, 'Please specify which QC engine to use.'
+        assert xyz_path is not None, 'Please specify the path of xyz file.'
+        assert setting is not None, 'Please specify settings for QC calcualations.'
+
+>>>>>>> dc92221b0ed6c3e8dfaf8f71e40adf54f1f3d687
         self.qc_engine = qc_engine
         self.xyz_path  = xyz_path
         self.setting   = setting
