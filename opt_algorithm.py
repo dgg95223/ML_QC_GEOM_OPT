@@ -3,7 +3,7 @@
 from ase.io import read, write
 
 class Optimizer(object):
-    def __init__(self, mainobject, ml_engine, algorithm=None, opt_cycle):
+    def __init__(self, mainobject, ml_engine, opt_cycle, algorithm=None):
         self.atom_symbol = mainobject.atom_symbol
         self.cycle = opt_cycle
         algorithms = ['bfgs', 'lbfgs', 'gpmin', 'pyberny'] 
