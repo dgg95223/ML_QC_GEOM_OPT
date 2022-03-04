@@ -68,8 +68,8 @@ class Data(object):
 
 class PySCFdata(object):# the input obect may need to be modified 1/22/2022
     '''generate input files for ML engine from PySCF results'''
-    def __init__(self, mainobject):
-        self.mf       =    mainobject.QC_engine.mf
+    def __init__(self):
+        self.mf       =    engine.QC_engine.mf
         self.mol      =    self.mf.mol
         self.atoms    =    self.mol.atom # a list includes atom symbol and coordinates
         self.coords   =    self.mol.atom_coords() # a np tuple

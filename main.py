@@ -1,7 +1,24 @@
 #'''This code is the main frame of the interface.'''
+from asyncio.log import logger
 from QC_engine import QCEngine
 from ML_engine import MLEngine
 import numpy as np
+
+class Main():
+	def __init__(self, qcengine=None, mlengine=None, workpath=None):		
+		if qcengine is None:
+			logger.warning('No QC engine is specified, PySCF will be used.')
+			self.qcengine = 'pyscf'
+		else:
+			self.qcengine = qcengine
+		
+		if mlengine is None:
+			logger.warning('No ML engine is specified, DeePotential will used.')
+			self.mlengine = 'deepmd'
+		else:
+			self.mlengine = mlengine
+		
+
 
 class MLgeomopt():
 	def __init__(self, consistensy_tol=None, **qcsetting):
@@ -18,6 +35,7 @@ class MLgeomopt():
 
 	def kernel(self, workpath, xyz_path, qcengine, mlengine):
 		E_QC, G_QC = QCEngine(xyz_path, qcengine, self.qcseting).calc_new()
+
 
 		consistensy = False
 		iter = 0
