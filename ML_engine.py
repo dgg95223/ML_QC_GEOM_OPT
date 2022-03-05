@@ -1,3 +1,4 @@
+
 import numpy as np
 import subprocess
 
@@ -24,6 +25,9 @@ class DeePMD(object):
     def freeze(self):
         freeze = subprocess.run('dp freeze -o graph.pb', shell=True)
         assert freeze.returncode == 0, 'An error occurred during freezing process.'
+
+    def add_geom(self, geom):
+        
 
     def run(self):
         self.training()
