@@ -93,6 +93,9 @@ class PySCF(object): # moleclue is the Mole object of gto module
     def check_scf_converge(self):
         assert self.mf.converged is True, 'SCF is not converged, please modify related paramaters and rerun the calculations.'
 
+    def build(self):
+        return self.build_mf_object(self)
+
     def cal_new(self):
         # run calculation
         self.mf.kernel()

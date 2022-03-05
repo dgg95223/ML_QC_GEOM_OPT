@@ -13,14 +13,16 @@ def read_xyz(xyz_path, index=None):
     # _atoms = ''.join(_atoms_[2:]) # A string containing atom symbol and coordinates
     
     # return atoms_num, atom_symbol, _atoms
+    
+    ####################################################################################
 
     # Multiple geometries in one xyz file
     if index is None:
         index = -1  # read the last geometry as default
     elif index > 0:
-        index = index -1
+        index = index - 1
     elif index == 0:
-        assert index != 0, "'index' should be natural number"
+        assert index != 0, "'index' should be a natural number"
 
     with open(xyz_path,'r') as xyz:
         molecules = xyz.readlines()
@@ -44,10 +46,10 @@ def write_xyz(xyz_path, atom_num, atoms):
             xyz.write('\n')
         else:
             pass
-        xyz.write(str(atom_num))
+        xyz.write(str(atom_num)  )
         xyz.write('\n')
         for atom in _atoms:
-            xyz.write('%8s %15.8f 515.8f %15.8f\n'%(atom[0], atom[1], atom[2], atom[3]))
+            xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], atom[1], atom[2], atom[3]))
 
 class Data(object):
     def __init__(self, qc_engine, ml_engine, mainobject):
