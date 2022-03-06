@@ -9,18 +9,18 @@ import numpy as np
 
 
 class MLgeomopt():
-	def __init__(self, qcengine=None, mlengine=None, work_path=None, xyz_path=None, consistensy_tol=None):
-		if qcengine is None:
+	def __init__(self, qc_engine=None, ml_engine=None, work_path=None, xyz_path=None, consistensy_tol=None):
+		if qc_engine is None:
 			logger.warning('No QC engine is specified, PySCF will be used.')
 			self.qcengine = 'pyscf'
 		else:
-			self.qcengine = qcengine
+			self.qcengine = qc_engine.
 		
-		if mlengine is None:
+		if ml_engine is None:
 			logger.warning('No ML engine is specified, DeePotential will used.')
 			self.mlengine = 'deepmd'
 		else:
-			self.mlengine = mlengine
+			self.mlengine = ml_engine
 
 		if work_path is None:
 			logger.warning('No work path is specified, the current path will be used as the default work path')

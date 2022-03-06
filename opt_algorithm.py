@@ -56,12 +56,3 @@ class Optimizer(object):
         self.write_xyz(_atoms)
         self.optimized_geom = _atoms.geit_positions()
         
-
-    
-
-
-        
-
-dyn = BFGS(water)
-dyn.run(fmax=1e-6)
-print(water.get_positions())

@@ -1,6 +1,7 @@
 '''Functions dealing with i/o operations'''
 
 import numpy as np
+from main import MLgeomopt
 
 def read_xyz(xyz_path, index=None):
     '''Read geometry from a xyz file with multiple geometries'''
@@ -46,13 +47,14 @@ def write_xyz(xyz_path, atom_num, atoms):
             xyz.write('\n')
         else:
             pass
-        xyz.write(str(atom_num)  )
+        xyz.write(str(atom_num))
         xyz.write('\n')
         for atom in _atoms:
             xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], atom[1], atom[2], atom[3]))
 
-class Data(object):
-    def __init__(self, qc_engine, ml_engine, mainobject):
+class Data(MLgeomopt):
+    def __init__(self, qc_engine, ml_engine, work_path):
+        super(MLgeomopt, self).__init__(qc_engine, ml_engine, work_path)
         
         if ml_engine.lower() == 'deepmd':
             if qc_engine is None or qc_engine.lower() == 'pyscf':
