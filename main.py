@@ -14,7 +14,7 @@ class MLgeomopt():
 			logger.warning('No QC engine is specified, PySCF will be used.')
 			self.qcengine = 'pyscf'
 		else:
-			self.qcengine = qc_engine.
+			self.qcengine = qc_engine
 		
 		if ml_engine is None:
 			logger.warning('No ML engine is specified, DeePotential will used.')
