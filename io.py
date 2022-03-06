@@ -72,16 +72,16 @@ class Data(MLgeomopt):
 
 class PySCFdata(object):# the input obect may need to be modified 1/22/2022
     '''generate input files for ML engine from PySCF results'''
-    def __init__(self):
-        self.mf       =    engine.QC_engine.mf
+    def __init__(self, Data, PySCF):
+        self.mf       =    PySCF.mf
         self.mol      =    self.mf.mol
         self.atoms    =    self.mol.atom # a list includes atom symbol and coordinates
         self.coords   =    self.mol.atom_coords() # a np tuple
         self.energy   =    self.mf.energy_tot()
         self.forces   =    self.mf.Gradients().grad()
         
-        self.ML_engine = mainobject.ML_engine
-        self.file_path = mainobject.file_path
+        self.ML_engine = Data.ml_engine
+        self.file_path = Data.work_path
 
         # constants
         from pyscf.data.nist import BOHR ,HARTREE2EV
