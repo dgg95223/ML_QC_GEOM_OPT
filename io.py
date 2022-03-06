@@ -1,6 +1,7 @@
 '''Functions dealing with i/o operations'''
 
 import numpy as np
+from main import MLgeomopt
 
 def read_xyz(xyz_path, index=None):
     '''Read geometry from a xyz file with multiple geometries'''
@@ -13,14 +14,16 @@ def read_xyz(xyz_path, index=None):
     # _atoms = ''.join(_atoms_[2:]) # A string containing atom symbol and coordinates
     
     # return atoms_num, atom_symbol, _atoms
+    
+    ####################################################################################
 
     # Multiple geometries in one xyz file
     if index is None:
         index = -1  # read the last geometry as default
     elif index > 0:
-        index = index -1
+        index = index - 1
     elif index == 0:
-        assert index != 0, "'index' should be natural number"
+        assert index != 0, "'index' should be a natural number"
 
     with open(xyz_path,'r') as xyz:
         molecules = xyz.readlines()
@@ -47,10 +50,11 @@ def write_xyz(xyz_path, atom_num, atoms):
         xyz.write(str(atom_num))
         xyz.write('\n')
         for atom in _atoms:
-            xyz.write('%8s %15.8f 515.8f %15.8f\n'%(atom[0], atom[1], atom[2], atom[3]))
+            xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], atom[1], atom[2], atom[3]))
 
-class Data(object):
-    def __init__(self, qc_engine, ml_engine, mainobject):
+class Data(MLgeomopt):
+    def __init__(self, qc_engine, ml_engine, work_path):
+        super(MLgeomopt, self).__init__(qc_engine, ml_engine, work_path)
         
         if ml_engine.lower() == 'deepmd':
             if qc_engine is None or qc_engine.lower() == 'pyscf':
@@ -68,16 +72,16 @@ class Data(object):
 
 class PySCFdata(object):# the input obect may need to be modified 1/22/2022
     '''generate input files for ML engine from PySCF results'''
-    def __init__(self, mainobject):
-        self.mf       =    mainobject.QC_engine.mf
+    def __init__(self, Data, PySCF):
+        self.mf       =    PySCF.mf
         self.mol      =    self.mf.mol
         self.atoms    =    self.mol.atom # a list includes atom symbol and coordinates
         self.coords   =    self.mol.atom_coords() # a np tuple
         self.energy   =    self.mf.energy_tot()
         self.forces   =    self.mf.Gradients().grad()
         
-        self.ML_engine = mainobject.ML_engine
-        self.file_path = mainobject.file_path
+        self.ML_engine = Data.ml_engine
+        self.file_path = Data.work_path
 
         # constants
         from pyscf.data.nist import BOHR ,HARTREE2EV

@@ -7,6 +7,11 @@ from io import read_xyz
 
 class QCEngine(object): 
     def __init__(self, qc_engine=None, xyz_path=None, **setting):
+
+        assert qc_engine is not None, 'Please specify which QC engine to use.'
+        assert xyz_path is not None, 'Please specify the path of xyz file.'
+        assert setting is not None, 'Please specify settings for QC calcualations.'
+
         self.qc_engine = qc_engine
         self.xyz_path  = xyz_path
         self.setting   = setting
@@ -87,6 +92,9 @@ class PySCF(object): # moleclue is the Mole object of gto module
 
     def check_scf_converge(self):
         assert self.mf.converged is True, 'SCF is not converged, please modify related paramaters and rerun the calculations.'
+
+    def build(self):
+        return self.build_mf_object(self)
 
     def cal_new(self):
         # run calculation

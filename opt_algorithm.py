@@ -3,7 +3,7 @@
 from ase.io import read, write
 
 class Optimizer(object):
-    def __init__(self, mainobject, ml_engine, algorithm=None, opt_cycle):
+    def __init__(self, mainobject, ml_engine, opt_cycle, algorithm=None):
         self.atom_symbol = mainobject.atom_symbol
         self.cycle = opt_cycle
         algorithms = ['bfgs', 'lbfgs', 'gpmin', 'pyberny'] 
@@ -56,12 +56,3 @@ class Optimizer(object):
         self.write_xyz(_atoms)
         self.optimized_geom = _atoms.geit_positions()
         
-
-    
-
-
-        
-
-dyn = BFGS(water)
-dyn.run(fmax=1e-6)
-print(water.get_positions())
