@@ -5,7 +5,7 @@ from pyscf import gto, scf, dft, grad
 from pyscf.data.nist import BOHR
 from io import read_xyz
 
-class QCEngine(object): 
+class QCEngine(): 
     def __init__(self, qc_engine=None, xyz_path=None, **setting):
 
         assert qc_engine is not None, 'Please specify which QC engine to use.'
@@ -26,7 +26,7 @@ class QCEngine(object):
 
         return engine(xyz_path=self.xyz_path, **self.setting)
 
-class PySCF(object): # moleclue is the Mole object of gto module
+class PySCF(): # moleclue is the Mole object of gto module
     '''create PySCF mol object and run energy and gradient calculation'''
     def __init__(self, xyz_path=None, **setting):
         # from pyscf import gto

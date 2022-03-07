@@ -1,5 +1,6 @@
 '''Functions dealing with i/o operations'''
 
+from tkinter import W
 import numpy as np
 from main import MLgeomopt
 
@@ -58,21 +59,23 @@ class Data(MLgeomopt):
         
         if ml_engine.lower() == 'deepmd':
             if qc_engine is None or qc_engine.lower() == 'pyscf':
-                data = PySCFdata
+                self.data = PySCFdata
             elif qc_engine.lower() == 'gaussain':
-                data = Gaussiandata
+                self.data = Gaussiandata
             elif qc_engine.lower() == 'vasp':
-                data = VASPdata
+                self.data = VASPdata
             else:
                 raise(NotImplementedError)
         else:
             raise(NotImplementedError)
 
-        return data(mainobject)
+    def build(self, engine_obj):
+        return self.data(self.ml_engine, self.work_path, engine_obj)
 
-class PySCFdata(object):# the input obect may need to be modified 1/22/2022
+
+class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
     '''generate input files for ML engine from PySCF results'''
-    def __init__(self, Data, PySCF):
+    def __init__(self, ml_engine, work_path, PySCF):
         self.mf       =    PySCF.mf
         self.mol      =    self.mf.mol
         self.atoms    =    self.mol.atom # a list includes atom symbol and coordinates
@@ -80,8 +83,8 @@ class PySCFdata(object):# the input obect may need to be modified 1/22/2022
         self.energy   =    self.mf.energy_tot()
         self.forces   =    self.mf.Gradients().grad()
         
-        self.ML_engine = Data.ml_engine
-        self.file_path = Data.work_path
+        self.ML_engine = ml_engine
+        self.file_path = work_path
 
         # constants
         from pyscf.data.nist import BOHR ,HARTREE2EV
