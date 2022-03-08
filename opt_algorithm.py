@@ -32,7 +32,7 @@ class Optimizer(object):
         write(self.xyz_path, atom_obj, append=True)
 
     def run_opt(self, ml_engine):
-        '''Reference ; https://wiki.fysik.dtu.dk/ase/ase/optimize.html
+        '''Reference: https://wiki.fysik.dtu.dk/ase/ase/optimize.html
         '''
         if self.geom_opt_algorithm == 'bfgs':
             from ase.optimize import BFGS

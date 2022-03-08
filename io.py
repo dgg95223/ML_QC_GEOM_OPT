@@ -1,6 +1,6 @@
 '''Functions dealing with i/o operations'''
 
-from tkinter import W
+from statistics import mode
 import numpy as np
 from main import MLgeomopt
 
@@ -30,12 +30,12 @@ def read_xyz(xyz_path, index=None):
         molecules = xyz.readlines()
     
     atoms_num = int(molecules[0])
-    atom_symbol = np.loadtxt(xyz_path, usecols=0, dtype='str', max_rows=atoms_num+2)
+    atom_symbol = np.loadtxt(xyz_path, usecols=0, dtype='str', max_rows=atoms_num+2)[1:]
 
     if index == -1:
         _atoms = ''.join(molecules[index * atoms_num:])
     else:
-        _atoms = ''.join(molecules[index * (atoms_num+2):index * (atoms_num+2) + atoms_num])
+        _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])
 
     return atoms_num, atom_symbol, _atoms
 
@@ -53,7 +53,54 @@ def write_xyz(xyz_path, atom_num, atoms):
         for atom in _atoms:
             xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], atom[1], atom[2], atom[3]))
 
+def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=False):
+    if append is False:
+        mode = 'w'
+    elif append is True:
+        mode = 'a'
+        
+    '''type_map.raw format:
+
+    atom_symbol_1 atom_symbol_2 ...
+
+    n            : integer, the index of atom
+    atom_symbol_n: str, the symbol of atom
+    '''
+
+    with open(work_path + 'type_amp', mode) as type:
+        for i in range(0, len(coords)):
+            type.write(atom_symbol[i] + ' ')
+
+    '''coord.raw format:
+    
+    coord_x_1 coord_y_1 coord_z_1 coord_x_2 coord_y_2 coord_z_2 ...
+
+    coord_x_n, coord_y_n, coord_z_n: float, 3 components of coordinates of an atom
+    Each line contains coordinates of all atoms in one frame
+    '''
+    with open(work_path + 'coord.raw', mode) as coord:
+        coord.write(str(coords.flatten()))
+
+    '''energy.raw format:
+    
+    energy_1
+
+    energy_n: float, total energy of a system
+    '''
+    with open(work_path + 'energy.raw', mode) as energy:
+        energy.write(str(energy))
+
+    '''force.raw format:
+    
+    force_x_1 force_y_1 force_z_1 force_x_2 force_y_2 force_z_2 ...
+
+    force_x_n, force_y_n, force_z_n: float, 3 components of force of an atom
+    '''
+    with open(work_path + 'force.raw', mode) as force:
+        force.write(str(forces.flatten()))
+
 class Data(MLgeomopt):
+    '''This class control the data communication between QC engine and ML engine'''
     def __init__(self, qc_engine, ml_engine, work_path):
         super(MLgeomopt, self).__init__(qc_engine, ml_engine, work_path)
         
@@ -70,21 +117,22 @@ class Data(MLgeomopt):
             raise(NotImplementedError)
 
     def build(self, engine_obj):
-        return self.data(self.ml_engine, self.work_path, engine_obj)
+        self.data(self.ml_engine, self.work_path, engine_obj)
 
 
 class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
-    '''generate input files for ML engine from PySCF results'''
+    '''This class control the data communication between PySCF and ML engine'''
     def __init__(self, ml_engine, work_path, PySCF):
-        self.mf       =    PySCF.mf
-        self.mol      =    self.mf.mol
-        self.atoms    =    self.mol.atom # a list includes atom symbol and coordinates
-        self.coords   =    self.mol.atom_coords() # a np tuple
-        self.energy   =    self.mf.energy_tot()
-        self.forces   =    self.mf.Gradients().grad()
+        self.mf          =    PySCF.mf
+        self.mol         =    self.mf.mol
+        self.atoms       =    self.mol.atom # a list includes atom symbol and coordinates
+        self.atom_symbol =    PySCF.atom_symbol
+        self.coords      =    self.mol.atom_coords() # a np tuple
+        self.energy      =    self.mf.energy_tot()
+        self.forces      =    self.mf.Gradients().grad()
         
         self.ML_engine = ml_engine
-        self.file_path = work_path
+        self.work_path = work_path
 
         # constants
         from pyscf.data.nist import BOHR ,HARTREE2EV
@@ -97,49 +145,16 @@ class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
             self.energy_convert = hartree2eV
             self.force_convert  = hartree2eV / bohr2ang
 
-    def dump(self):
+    def dump(self): # dump pyscf data to raw file for ML engine
         if self.ML_engine.lower() == 'deepmd':
-            return self.dump_to_deepmd()
+            self.dump_to_deepmd()
 
-    def dump_to_deepmd(self): # dump data to raw file for MLe engine
-        '''type_map.raw format:
-
-        atom_symbol_1 atom_symbol_2 ...
-    
-        n            : integer, the index of atom
-        atom_symbol_n: str, the symbol of atom
-        '''
-
-        with open(self.file_path + 'type_amp', 'w') as type:
-            for i in range(0, len(self.coords)):
-                type.write(self.mol.atom_symbol(i) + ' ')
-
-        '''coord.raw format:
-        
-        coord_x_1 coord_y_1 coord_z_1 coord_x_2 coord_y_2 coord_z_2 ...
-
-        coord_x_n, coord_y_n, coord_z_n: float, 3 components of coordinates of an atom
-        '''
-        with open(self.file_path + 'coord.raw', 'w') as coord:
-            coord.write(str(self.coords.flatten() * self.length_convert))
-
-        '''energy.raw format:
-        
-        energy_1
-
-        energy_n: float, total energy of a system
-        '''
-        with open(self.file_path + 'energy.raw', 'w') as energy:
-            energy.write(str(self.energy +  self.energy_convert))
-
-        '''force.raw format:
-        
-        force_x_1 force_y_1 force_z_1 force_x_2 force_y_2 force_z_2 ...
-
-        force_x_n, force_y_n, force_z_n: float, 3 components of force of an atom
-        '''
-        with open(self.file_path + 'force.raw', 'w') as force:
-            force.write(str(self.forces.flatten() * self.force_convert))
+    def dump_to_deepmd(self, mode): # dump pyscf data to raw file for deepmd-kit         
+        write_raw_deepmd(self.work_path,
+                         self.atom_symbol,
+                         self.coords * self.length_convert,
+                         self.energy * self.energy_convert,
+                         self.forces * self.force_convert, mode)
 
         
 

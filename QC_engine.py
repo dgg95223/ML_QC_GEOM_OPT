@@ -27,7 +27,14 @@ class QCEngine():
         return engine(xyz_path=self.xyz_path, **self.setting)
 
 class PySCF(): # moleclue is the Mole object of gto module
-    '''create PySCF mol object and run energy and gradient calculation'''
+    '''Create PySCF mol and mf object and run energy and gradient calculation
+    Usage:
+        qcengine = PySCF(xyz_path='xxx', a=xxx, b=xxx,...)
+        qcengine.build()
+        energy, force = qcengine.calc_new()
+    
+    
+    '''
     def __init__(self, xyz_path=None, **setting):
         # from pyscf import gto
         
@@ -61,6 +68,7 @@ class PySCF(): # moleclue is the Mole object of gto module
                     spin=self.setting['spin']).build()
 
     def build_mf_object(self):
+        '''Build mf object for DFT or HF calculation''' # TDSCF calculation support can be done in the future 3/8/2022
         # check setting
         scf_basic_keys = ['xc', 'restricted'] # key restricted is bool
         scf_advance_keys = ['conv_tol', 'max_cycle', 'verbose', 'grids.level']
@@ -93,12 +101,11 @@ class PySCF(): # moleclue is the Mole object of gto module
     def check_scf_converge(self):
         assert self.mf.converged is True, 'SCF is not converged, please modify related paramaters and rerun the calculations.'
 
-    def build(self):
-        return self.build_mf_object(self)
-
-    def cal_new(self):
+    def calc_new(self):
         # run calculation
+        self.build_mf_object()
         self.mf.kernel()
+        self.check_scf_converge()
 
         e_tot = self.mf.e_tot
         force = self.mf.Gradients().grad()

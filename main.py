@@ -9,7 +9,7 @@ import numpy as np
 
 
 class MLgeomopt():
-	def __init__(self, qc_engine=None, ml_engine=None, work_path=None, xyz_path=None, consistensy_tol=None):
+	def __init__(self, qc_engine=None, ml_engine=None, work_path=None, xyz_path=None, consistensy_tol=None, **qcsetting):
 		if qc_engine is None:
 			logger.warning('No QC engine is specified, PySCF will be used.')
 			self.qcengine = 'pyscf'
@@ -35,8 +35,12 @@ class MLgeomopt():
 		else:
 			self.xyz_path = xyz_path
 
+		self.qcsetting = qcsetting
+
 		if consistensy_tol is None:
-			self.consistensy_tol = 0.000001
+			consistensy_tol = 1e-6
+			logger.warning('No convergence tolarence is specified, default tolarence %12.11 will be used'%consistensy_tol)
+			self.consistensy_tol = consistensy_tol
 		else:
 			self.consistensy_tol = consistensy_tol
 		
@@ -46,7 +50,7 @@ class MLgeomopt():
 		return consistensy_met
 
 	def kernel(self, workpath, xyz_path, qcengine, mlengine):
-		E_QC, G_QC = QCEngine(xyz_path, qcengine, self.qcseting).calc_new()
+		E_QC, G_QC = QCEngine(qc_engine=qcengine, xyz_path=xyz_path, **self.qcsetting).calc_new()
 
 
 		consistensy = False
