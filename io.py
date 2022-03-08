@@ -2,7 +2,6 @@
 
 import numpy as np
 
-
 def read_xyz(xyz_path, index=None):
     '''Read geometry from a xyz file with multiple geometries'''
     # One geometry in one xyz file
@@ -56,7 +55,7 @@ def write_xyz(xyz_path, atom_num, atoms):
                                                     np.float64(atom[2]),
                                                     np.float64(atom[3])))
 
-def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=False):
+def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True):
     if append is False:
         mode = 'w'
     else:
@@ -168,14 +167,14 @@ class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
             self.energy_convert = hartree2eV
             self.force_convert  = hartree2eV / bohr2ang
 
-    def dump(self): # dump pyscf data to raw file for ML engine
+    def dump(self, append=True): # dump pyscf data to raw file for ML engine
         if self.ML_engine.lower() == 'deepmd':
-            self.dump_to_deepmd()
+            self.dump_to_deepmd(append=append)
 
-    def dump_to_deepmd(self, mode): # dump pyscf data to raw file for deepmd-kit         
+    def dump_to_deepmd(self, append=True): # dump pyscf data to raw file for deepmd-kit         
         write_raw_deepmd(self.work_path,
                          self.atom_symbol,
                          self.coords * self.length_convert,
                          self.energy * self.energy_convert,
                          self.forces * self.force_convert, 
-                         mode)
+                         append=append)

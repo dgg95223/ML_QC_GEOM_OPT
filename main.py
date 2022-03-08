@@ -4,9 +4,7 @@ import subprocess
 import logging
 logger = logging.getLogger(__name__)
 
-
 import io, QC_engine, ML_engine
-
 import numpy as np
 
 
@@ -52,18 +50,24 @@ class MLgeomopt():
 		return consistensy_met
 
 	def kernel(self):
+		# initialization
 		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting)
+		E_QC, G_QC = QC.calc_new()
+		
+		append = False
+		data = io.Data(self.qcengine, self.ml_engine, self.work_path).build(QC)
+		data.dump(append=append)
 
+		# loop starts here
 		consistensy = False
 		iter = 0
 		while consistensy is not True and iter < self.max_cycle:
 			E_QC, G_QC = QC.calc_new()
 		
-			data = io.Data(self.qcengine, self.ml_engine, self.work_path).build(QC)
-			data.dump()
+			
 
 			ML = ML_engine.MLEngine(self.work_path, self.ml_engine)
-			ML.add_geom()
+
 			ML.training()
 			E_ML = ML_engine.MLEngine().calc_new()
 			consistensy = self.check_consistensy(E_ML, E_QC)
