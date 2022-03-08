@@ -34,15 +34,16 @@ def read_xyz(xyz_path, index=None):
 
     if index == -1:
         _atoms = ''.join(molecules[index * atoms_num:])
+    elif molecules[(index + 1) * (atoms_num + 2) - 1][-1] == '\n':
+        _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])[:-1]
     else:
         _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])
-
     return atoms_num, atom_symbol, _atoms
 
 def write_xyz(xyz_path, atom_num, atoms):
     _atoms = np.reshape(atoms.split(), (atom_num,4))   
 
-    with open(xyz_path,'a+') as xyz:
+    with open(xyz_path,'r+') as xyz:
         last_line = xyz.readlines()[-1]
         if last_line[-1] != '\n':
             xyz.write('\n')
@@ -51,7 +52,10 @@ def write_xyz(xyz_path, atom_num, atoms):
         xyz.write(str(atom_num))
         xyz.write('\n')
         for atom in _atoms:
-            xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], atom[1], atom[2], atom[3]))
+            xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], 
+                                                    np.float64(atom[1]),
+                                                    np.float64(atom[2]),
+                                                    np.float64(atom[3])))
 
 def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=False):
     if append is False:
