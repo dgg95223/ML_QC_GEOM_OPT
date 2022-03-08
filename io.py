@@ -1,8 +1,7 @@
 '''Functions dealing with i/o operations'''
 
-from statistics import mode
 import numpy as np
-from main import MLgeomopt
+
 
 def read_xyz(xyz_path, index=None):
     '''Read geometry from a xyz file with multiple geometries'''
@@ -52,7 +51,7 @@ def write_xyz(xyz_path, atom_num, atoms):
         xyz.write(str(atom_num))
         xyz.write('\n')
         for atom in _atoms:
-            xyz.write('%8s %20.15f %20.15f %20.15f\n'%(atom[0], 
+            xyz.write('%2s %20.15f %20.15f %20.15f\n'%(atom[0], 
                                                     np.float64(atom[1]),
                                                     np.float64(atom[2]),
                                                     np.float64(atom[3])))
@@ -119,10 +118,13 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=Fals
             pass
         force.write(str(forces.flatten()))
 
-class Data(MLgeomopt):
+class Data():
     '''This class control the data communication between QC engine and ML engine'''
     def __init__(self, qc_engine, ml_engine, work_path):
-        super(MLgeomopt, self).__init__(qc_engine, ml_engine, work_path)
+        
+        self.qc_engine = qc_engine
+        self.ml_engine = ml_engine
+        self.work_path = work_path
         
         if ml_engine.lower() == 'deepmd':
             if qc_engine is None or qc_engine.lower() == 'pyscf':
@@ -143,6 +145,7 @@ class Data(MLgeomopt):
 class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
     '''This class control the data communication between PySCF and ML engine'''
     def __init__(self, ml_engine, work_path, PySCF):
+        super(PySCFdata, self).__init__('pyscf',ml_engine, work_path)
         self.mf          =    PySCF.mf
         self.mol         =    self.mf.mol
         self.atoms       =    self.mol.atom # a list includes atom symbol and coordinates
@@ -174,10 +177,5 @@ class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
                          self.atom_symbol,
                          self.coords * self.length_convert,
                          self.energy * self.energy_convert,
-                         self.forces * self.force_convert, mode)
-
-        
-
-
-
-        
+                         self.forces * self.force_convert, 
+                         mode)

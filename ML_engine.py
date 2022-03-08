@@ -1,10 +1,13 @@
 
 import numpy as np
 import subprocess
+import io
+
+# def add_geom(geom):
 
 
 class MLEngine(object):
-    def __init__(self, work_path, ml_engine):
+    def __init__(self, work_path=work_path, ml_engine=ml_engine):
         self.work_path = work_path # work_path is the path of raw files for ML engine
         if ml_engine.lower()== 'deepmd':
             self.engine = DeePMD
@@ -25,9 +28,6 @@ class DeePMD(object):
     def freeze(self):
         freeze = subprocess.run('dp freeze -o graph.pb', shell=True)
         assert freeze.returncode == 0, 'An error occurred during freezing process.'
-
-    def add_geom(self, geom):
-        
 
     def run(self):
         self.training()

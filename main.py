@@ -1,10 +1,12 @@
 #'''This code is the main frame of the interface.'''
+
 import subprocess
 import logging
 logger = logging.getLogger(__name__)
 
-from QC_engine import QCEngine
-from ML_engine import MLEngine
+
+import io, QC_engine, ML_engine
+
 import numpy as np
 
 
@@ -12,21 +14,21 @@ class MLgeomopt():
 	def __init__(self, qc_engine=None, ml_engine=None, work_path=None, xyz_path=None, consistensy_tol=None, **qcsetting):
 		if qc_engine is None:
 			logger.warning('No QC engine is specified, PySCF will be used.')
-			self.qcengine = 'pyscf'
+			self.qc_engine = 'pyscf'
 		else:
-			self.qcengine = qc_engine
+			self.qc_engine = qc_engine
 		
 		if ml_engine is None:
 			logger.warning('No ML engine is specified, DeePotential will used.')
-			self.mlengine = 'deepmd'
+			self.ml_engine = 'deepmd'
 		else:
-			self.mlengine = ml_engine
+			self.ml_engine = ml_engine
 
 		if work_path is None:
 			logger.warning('No work path is specified, the current path will be used as the default work path')
-			self.workpath = './'
+			self.work_path = './'
 		else:
-			self.workpath = work_path
+			self.work_path = work_path
 
 		if xyz_path is None:
 			logger.warning('No path of xyz file is specified, the current path will be used as the default path.')
@@ -49,15 +51,20 @@ class MLgeomopt():
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy
 		return consistensy_met
 
-	def kernel(self, workpath, xyz_path, qcengine, mlengine):
-		E_QC, G_QC = QCEngine(qc_engine=qcengine, xyz_path=xyz_path, **self.qcsetting).calc_new()
-
+	def kernel(self):
+		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting)
 
 		consistensy = False
 		iter = 0
 		while consistensy is not True and iter < self.max_cycle:
-			MLEngine(workpath, mlengine).add_geom()
-			MLEngine(workpath, mlengine).training()
-			E_ML = MLEngine().calc_new()
+			E_QC, G_QC = QC.calc_new()
+		
+			data = io.Data(self.qcengine, self.ml_engine, self.work_path).build(QC)
+			data.dump()
+
+			ML = ML_engine.MLEngine(self.work_path, self.ml_engine)
+			ML.add_geom()
+			ML.training()
+			E_ML = ML_engine.MLEngine().calc_new()
 			consistensy = self.check_consistensy(E_ML, E_QC)
 			iter += 1

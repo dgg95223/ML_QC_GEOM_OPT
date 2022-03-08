@@ -30,10 +30,7 @@ class PySCF(): # moleclue is the Mole object of gto module
     '''Create PySCF mol and mf object and run energy and gradient calculation
     Usage:
         qcengine = PySCF(xyz_path='xxx', a=xxx, b=xxx,...)
-        qcengine.build()
-        energy, force = qcengine.calc_new()
-    
-    
+        energy, force = qcengine.calc_new()   
     '''
     def __init__(self, xyz_path=None, **setting):
         # from pyscf import gto
@@ -119,17 +116,21 @@ class PySCF(): # moleclue is the Mole object of gto module
 class Gaussian(object):
     
     def __init__(self, xyz_path=None, **setting):
+        return NotImplemented
 
     def write_input_file(self):
+        return NotImplemented
 
     def read_output_file(self):
-        return
+        return NotImplemented
 
 class VASP(object):
     
     def __init__(self, xyz_path=None, **setting):
+        return NotImplemented
 
     def write_input_file(self):
+        return NotImplemented
 
     def read_output_file(self):
-        return
+        return NotImplemented
