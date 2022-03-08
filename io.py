@@ -60,8 +60,8 @@ def write_xyz(xyz_path, atom_num, atoms):
 def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=False):
     if append is False:
         mode = 'w'
-    elif append is True:
-        mode = 'a'
+    else:
+        mode = 'a+'
         
     '''type_map.raw format:
 
@@ -72,6 +72,10 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=Fals
     '''
 
     with open(work_path + 'type_amp', mode) as type:
+        if mode == 'a+':
+            type.write('\n')
+        else:
+            pass
         for i in range(0, len(coords)):
             type.write(atom_symbol[i] + ' ')
 
@@ -83,6 +87,10 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=Fals
     Each line contains coordinates of all atoms in one frame
     '''
     with open(work_path + 'coord.raw', mode) as coord:
+        if mode == 'a+':
+            coord.write('\n')
+        else:
+            pass
         coord.write(str(coords.flatten()))
 
     '''energy.raw format:
@@ -92,6 +100,10 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=Fals
     energy_n: float, total energy of a system
     '''
     with open(work_path + 'energy.raw', mode) as energy:
+        if mode == 'a+':
+            energy.write('\n')
+        else:
+            pass
         energy.write(str(energy))
 
     '''force.raw format:
@@ -101,6 +113,10 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=Fals
     force_x_n, force_y_n, force_z_n: float, 3 components of force of an atom
     '''
     with open(work_path + 'force.raw', mode) as force:
+        if mode == 'a+':
+            force.write('\n')
+        else:
+            pass
         force.write(str(forces.flatten()))
 
 class Data(MLgeomopt):
