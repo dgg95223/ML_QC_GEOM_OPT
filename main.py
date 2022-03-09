@@ -2,9 +2,10 @@
 
 import subprocess
 import logging
+
 logger = logging.getLogger(__name__)
 
-import io, QC_engine, ML_engine
+import io, QC_engine, ML_engine, optimizer
 import numpy as np
 
 
@@ -43,7 +44,9 @@ class MLgeomopt():
 			self.consistensy_tol = consistensy_tol
 		else:
 			self.consistensy_tol = consistensy_tol
-		
+
+		self.algorithm = None
+		self.max_opt_cycle = None
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy
@@ -55,20 +58,32 @@ class MLgeomopt():
 		E_QC, G_QC = QC.calc_new()
 		
 		append = False
-		data = io.Data(self.qcengine, self.ml_engine, self.work_path).build(QC)
+		data = io.Data(self.qcengine, self.ml_engine, self.work_path)
+		data.build(QC)
 		data.dump(append=append)
 
 		# loop starts here
 		consistensy = False
-		iter = 0
+		append = True
+		iter = 1
 		while consistensy is not True and iter < self.max_cycle:
-			E_QC, G_QC = QC.calc_new()
-		
-			
+			ML = ML_engine.MLEngine(self.work_path, self.ml_engine).build()
+			ML.run()
 
-			ML = ML_engine.MLEngine(self.work_path, self.ml_engine)
+			Opt = optimizer.Optimizer(xyz_path=self.xyz_path,
+									work_path=self.work_path,
+									ml_engine=self.ml_engine,
+									outter_cycle=iter,
+									algorithm=self.opt_algorithm,
+									max_opt_cycle=self.max_opt_cycle)
 
-			ML.training()
-			E_ML = ML_engine.MLEngine().calc_new()
+			Opt.run_opt(self.ml_engine)
+			E_ML = Opt.ene_opt
+			coord_ml_opt = Opt.geom_opt
+			QC.update_coord(coord_ml_opt)
+			QC.calc_new()
+
 			consistensy = self.check_consistensy(E_ML, E_QC)
+			data.build(QC)
+			data.dump(append=append)
 			iter += 1

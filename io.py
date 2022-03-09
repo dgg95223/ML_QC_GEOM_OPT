@@ -57,7 +57,7 @@ def write_xyz(xyz_path, atom_num, atoms):
 
 def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True):
     if append is False:
-        mode = 'w'
+        mode = 'w+'
     else:
         mode = 'a+'
         
@@ -137,7 +137,8 @@ class Data():
         else:
             raise(NotImplementedError)
 
-    def build(self, engine_obj):
+    def build(self, engine_obj=None):
+        assert engine_obj is not None, 'Please specify a engine object which is the data source.'
         self.data(self.ml_engine, self.work_path, engine_obj)
 
 

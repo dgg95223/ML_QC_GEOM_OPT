@@ -33,8 +33,7 @@ class PySCF(): # moleclue is the Mole object of gto module
         energy, force = qcengine.calc_new()   
     '''
     def __init__(self, xyz_path=None, **setting):
-        # from pyscf import gto
-        
+        # from pyscf import gto  
         assert xyz_path is not None, "Can not find the xyz file"
         self.keys = []
         self.setting = setting
@@ -63,6 +62,10 @@ class PySCF(): # moleclue is the Mole object of gto module
                     ecp=self.setting['ecp'], 
                     symmetry=self.setting['symmetry'],
                     spin=self.setting['spin']).build()
+
+        self.e_tot  = None
+        self.force  = None
+        self.coords = self.mol.atom_coords()
 
     def build_mf_object(self):
         '''Build mf object for DFT or HF calculation''' # TDSCF calculation support can be done in the future 3/8/2022
@@ -104,10 +107,10 @@ class PySCF(): # moleclue is the Mole object of gto module
         self.mf.kernel()
         self.check_scf_converge()
 
-        e_tot = self.mf.e_tot
-        force = self.mf.Gradients().grad()
+        self.e_tot = self.mf.e_tot
+        self.force = self.mf.Gradients().grad()
 
-        return e_tot, force
+        return self.e_tot, self.force
 
     def update_coord(self, new_coord):
         self.mol = self.mol.set_geom_(new_coord * BOHR, inplace=True)

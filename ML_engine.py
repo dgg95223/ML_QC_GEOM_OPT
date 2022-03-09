@@ -1,7 +1,6 @@
 
 import numpy as np
 import subprocess
-import io
 
 # def add_geom(geom):
 
@@ -16,7 +15,7 @@ class MLEngine(object):
             self.engine = DeePMD
 
     def build(self):
-        return self.engine(work_path=self.work_path)
+        self.engine(work_path=self.work_path)
 
 class DeePMD(object):
     def __init__(self, work_path=None):
@@ -35,11 +34,3 @@ class DeePMD(object):
     def run(self):
         self.training()
         self.freeze()
-
-
-        
-
-
-
-
-
