@@ -68,7 +68,7 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True
     atom_symbol_n: str, the symbol of atom
     '''
 
-    with open(work_path + 'type_amp', mode) as type:
+    with open(work_path + 'type_amp.raw', mode) as type:
         if mode == 'a+':
             type.write('\n')
         else:
