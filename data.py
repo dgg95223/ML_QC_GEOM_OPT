@@ -1,5 +1,4 @@
 '''Functions dealing with i/o operations'''
-
 import numpy as np
 
 def read_xyz(xyz_path, index=None):
@@ -179,3 +178,11 @@ class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
                          self.energy * self.energy_convert,
                          self.forces * self.force_convert, 
                          append=append)
+class Gaussiandata():
+    def __init__(self):
+        pass
+class VASPdata():
+    def __init__(self):
+        pass
+        
+        

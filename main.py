@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import io, QC_engine, ML_engine, optimizer
+import data, QC_engine, ML_engine, optimizer
 import numpy as np
 
 
@@ -58,7 +58,7 @@ class MLgeomopt():
 		E_QC, G_QC = QC.calc_new()
 		
 		append = False
-		data = io.Data(self.qcengine, self.ml_engine, self.work_path)
+		data = data.Data(self.qcengine, self.ml_engine, self.work_path)
 		data.build(QC)
 		data.dump(append=append)
 
