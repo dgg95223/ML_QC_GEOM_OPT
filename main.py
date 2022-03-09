@@ -81,9 +81,11 @@ class MLgeomopt():
 			E_ML = Opt.ene_opt
 			coord_ml_opt = Opt.geom_opt
 			QC.update_coord(coord_ml_opt)
-			QC.calc_new()
+			E_QC, G_QC = QC.calc_new()
 
 			consistensy = self.check_consistensy(E_ML, E_QC)
 			data.build(QC)
 			data.dump(append=append)
 			iter += 1
+
+		self.opt_geom = coord_ml_opt
