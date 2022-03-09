@@ -40,7 +40,7 @@ class MLgeomopt():
 
 		if consistensy_tol is None:
 			consistensy_tol = 1e-6
-			logger.warning('No convergence tolarence is specified, default tolarence %12.11 will be used'%consistensy_tol)
+			logger.warning('No convergence tolarence is specified, default tolarence %12.11f will be used'%consistensy_tol)
 			self.consistensy_tol = consistensy_tol
 		else:
 			self.consistensy_tol = consistensy_tol
@@ -54,19 +54,20 @@ class MLgeomopt():
 
 	def kernel(self):
 		# initialization
-		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting)
+		if self.max_opt_cycle is None:
+			self.max_opt_cycle = 100
+		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
 		E_QC, G_QC = QC.calc_new()
 		
 		append = False
-		data = data.Data(self.qcengine, self.ml_engine, self.work_path)
-		data.build(QC)
-		data.dump(append=append)
+		data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
+		data1.dump(append=append)
 
 		# loop starts here
 		consistensy = False
 		append = True
 		iter = 1
-		while consistensy is not True and iter < self.max_cycle:
+		while consistensy is not True and iter < self.max_opt_cycle:
 			ML = ML_engine.MLEngine(self.work_path, self.ml_engine).build()
 			ML.run()
 

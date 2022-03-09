@@ -88,7 +88,8 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True
             coord.write('\n')
         else:
             pass
-        coord.write(str(coords.flatten()))
+        for i in coords.flatten():
+            coord.write('%15.11f'%i + ' ')
 
     '''energy.raw format:
     
@@ -96,12 +97,12 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True
 
     energy_n: float, total energy of a system
     '''
-    with open(work_path + 'energy.raw', mode) as energy:
+    with open(work_path + 'energy.raw', mode) as ene:
         if mode == 'a+':
-            energy.write('\n')
+            ene.write('\n')
         else:
             pass
-        energy.write(str(energy))
+        ene.write(str(energy))
 
     '''force.raw format:
     
@@ -114,7 +115,8 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True
             force.write('\n')
         else:
             pass
-        force.write(str(forces.flatten()))
+        for i in forces.flatten():
+            force.write('%20.15f'%i + ' ')
 
 class Data():
     '''This class control the data communication between QC engine and ML engine'''
@@ -138,13 +140,12 @@ class Data():
 
     def build(self, engine_obj=None):
         assert engine_obj is not None, 'Please specify a engine object which is the data source.'
-        self.data(self.ml_engine, self.work_path, engine_obj)
+        return self.data(self.ml_engine, self.work_path, engine_obj)
 
 
-class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
+class PySCFdata():# the input obect may need to be modified 1/22/2022
     '''This class control the data communication between PySCF and ML engine'''
     def __init__(self, ml_engine, work_path, PySCF):
-        super(PySCFdata, self).__init__('pyscf',ml_engine, work_path)
         self.mf          =    PySCF.mf
         self.mol         =    self.mf.mol
         self.atoms       =    self.mol.atom # a list includes atom symbol and coordinates
@@ -171,7 +172,7 @@ class PySCFdata(Data):# the input obect may need to be modified 1/22/2022
         if self.ML_engine.lower() == 'deepmd':
             self.dump_to_deepmd(append=append)
 
-    def dump_to_deepmd(self, append=True): # dump pyscf data to raw file for deepmd-kit         
+    def dump_to_deepmd(self, append=True): # dump pyscf data to raw file for deepmd-kit  
         write_raw_deepmd(self.work_path,
                          self.atom_symbol,
                          self.coords * self.length_convert,

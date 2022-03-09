@@ -15,7 +15,7 @@ class MLEngine(object):
             self.engine = DeePMD
 
     def build(self):
-        self.engine(work_path=self.work_path)
+        return self.engine(work_path=self.work_path)
 
 class DeePMD(object):
     def __init__(self, work_path=None):

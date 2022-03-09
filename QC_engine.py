@@ -25,6 +25,7 @@ class QCEngine():
             engine = VASP
 
         return engine(xyz_path=self.xyz_path, **self.setting)
+    
 
 class PySCF(): # moleclue is the Mole object of gto module
     '''Create PySCF mol and mf object and run energy and gradient calculation
@@ -72,7 +73,7 @@ class PySCF(): # moleclue is the Mole object of gto module
         # check setting
         scf_basic_keys = ['xc', 'restricted'] # key restricted is bool
         scf_advance_keys = ['conv_tol', 'max_cycle', 'verbose', 'grids.level']
-        scf_default_dict = {'conv_tol':1e-12, 'max_cyccle':100, 'verbose':0, 'grids.level':3}
+        scf_default_dict = {'conv_tol':1e-12, 'max_cycle':100, 'verbose':0, 'grids.level':3}
         for key in scf_basic_keys:
             assert key in self.keys, "Keyword '%s' mmust be specified, please check setting."%(key)
 
@@ -93,7 +94,7 @@ class PySCF(): # moleclue is the Mole object of gto module
             elif self.setting['restricted'] == False or self.setting['restricted'] == 0:
                 self.mf = scf.UHF(self.mol)
 
-        self.mf.conv_tol   = self.setting['conv_tol ']
+        self.mf.conv_tol   = self.setting['conv_tol']
         self.mf.max_cycle  = self.setting['max_cycle']
         self.mf.verbose    = self.setting['verbose']
         # self.mf.grids.level = self.setting['grids.level']            
