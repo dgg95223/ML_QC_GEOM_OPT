@@ -3,9 +3,9 @@
 import numpy as np
 from pyscf import gto, scf, dft, grad
 from pyscf.data.nist import BOHR
-from io import read_xyz
+from data import read_xyz
 
-class QCEngine(object): 
+class QCEngine(): 
     def __init__(self, qc_engine=None, xyz_path=None, **setting):
 
         assert qc_engine is not None, 'Please specify which QC engine to use.'
@@ -25,12 +25,16 @@ class QCEngine(object):
             engine = VASP
 
         return engine(xyz_path=self.xyz_path, **self.setting)
+    
 
-class PySCF(object): # moleclue is the Mole object of gto module
-    '''create PySCF mol object and run energy and gradient calculation'''
+class PySCF(): # moleclue is the Mole object of gto module
+    '''Create PySCF mol and mf object and run energy and gradient calculation
+    Usage:
+        qcengine = PySCF(xyz_path='xxx', a=xxx, b=xxx,...)
+        energy, force = qcengine.calc_new()   
+    '''
     def __init__(self, xyz_path=None, **setting):
-        # from pyscf import gto
-        
+        # from pyscf import gto  
         assert xyz_path is not None, "Can not find the xyz file"
         self.keys = []
         self.setting = setting
@@ -60,11 +64,16 @@ class PySCF(object): # moleclue is the Mole object of gto module
                     symmetry=self.setting['symmetry'],
                     spin=self.setting['spin']).build()
 
+        self.e_tot  = None
+        self.force  = None
+        self.coords = self.mol.atom_coords()
+
     def build_mf_object(self):
+        '''Build mf object for DFT or HF calculation''' # TDSCF calculation support can be done in the future 3/8/2022
         # check setting
         scf_basic_keys = ['xc', 'restricted'] # key restricted is bool
         scf_advance_keys = ['conv_tol', 'max_cycle', 'verbose', 'grids.level']
-        scf_default_dict = {'conv_tol':1e-12, 'max_cyccle':100, 'verbose':0, 'grids.level':3}
+        scf_default_dict = {'conv_tol':1e-12, 'max_cycle':100, 'verbose':0, 'grids.level':3}
         for key in scf_basic_keys:
             assert key in self.keys, "Keyword '%s' mmust be specified, please check setting."%(key)
 
@@ -85,7 +94,7 @@ class PySCF(object): # moleclue is the Mole object of gto module
             elif self.setting['restricted'] == False or self.setting['restricted'] == 0:
                 self.mf = scf.UHF(self.mol)
 
-        self.mf.conv_tol   = self.setting['conv_tol ']
+        self.mf.conv_tol   = self.setting['conv_tol']
         self.mf.max_cycle  = self.setting['max_cycle']
         self.mf.verbose    = self.setting['verbose']
         # self.mf.grids.level = self.setting['grids.level']            
@@ -93,17 +102,16 @@ class PySCF(object): # moleclue is the Mole object of gto module
     def check_scf_converge(self):
         assert self.mf.converged is True, 'SCF is not converged, please modify related paramaters and rerun the calculations.'
 
-    def build(self):
-        return self.build_mf_object(self)
-
-    def cal_new(self):
+    def calc_new(self):
         # run calculation
+        self.build_mf_object()
         self.mf.kernel()
+        self.check_scf_converge()
 
-        e_tot = self.mf.e_tot
-        force = self.mf.Gradients().grad()
+        self.e_tot = self.mf.e_tot
+        self.force = self.mf.Gradients().grad()
 
-        return e_tot, force
+        return self.e_tot, self.force
 
     def update_coord(self, new_coord):
         self.mol = self.mol.set_geom_(new_coord * BOHR, inplace=True)
@@ -112,17 +120,21 @@ class PySCF(object): # moleclue is the Mole object of gto module
 class Gaussian(object):
     
     def __init__(self, xyz_path=None, **setting):
+        return NotImplemented
 
     def write_input_file(self):
+        return NotImplemented
 
     def read_output_file(self):
-        return
+        return NotImplemented
 
 class VASP(object):
     
     def __init__(self, xyz_path=None, **setting):
+        return NotImplemented
 
     def write_input_file(self):
+        return NotImplemented
 
     def read_output_file(self):
-        return
+        return NotImplemented
