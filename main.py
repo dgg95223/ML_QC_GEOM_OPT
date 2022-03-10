@@ -47,6 +47,7 @@ class MLgeomopt():
 
 		self.algorithm = None
 		self.max_opt_cycle = None
+		self.engine_path = None
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy
@@ -68,8 +69,8 @@ class MLgeomopt():
 		append = True
 		iter = 1
 		while consistensy is not True and iter < self.max_opt_cycle:
-			ML = ML_engine.MLEngine(self.work_path, self.ml_engine).build()
-			ML.run()
+			ML = ML_engine.MLEngine(work_path=self.work_path, ml_engine=self.ml_engine, engine_path=self.engine_path).build()
+			ML.run(frame=iter)
 
 			Opt = optimizer.Optimizer(xyz_path=self.xyz_path,
 									work_path=self.work_path,
