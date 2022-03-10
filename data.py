@@ -1,4 +1,5 @@
 '''Functions dealing with i/o operations'''
+from asyncio import subprocess
 import numpy as np
 
 def read_xyz(xyz_path, index=None):
@@ -54,12 +55,38 @@ def write_xyz(xyz_path, atom_num, atoms):
                                                     np.float64(atom[2]),
                                                     np.float64(atom[3])))
 
-def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True):
+def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, append=True):
     if append is False:
         mode = 'w+'
     else:
         mode = 'a+'
+
+    if pbc is False:
+        with open('nopbc', 'w') as pbc:
+            pbc.write('')
         
+
+    _atom_symbol = list(set(atom_symbol))  # a list of atom symbol without repeating element
+    type_dict = {}
+    for ii, i in enumerate(_atom_symbol):
+        type_dict[i] = ii
+
+    '''type.raw format:
+
+    atom_index_1 atom_index_2 ...
+
+    n            : integer, the index of atom
+    atom_index_n: str, the index of atom
+    '''
+
+    with open(work_path + 'type.raw', mode) as type:
+        if mode == 'a+':
+            type.write('\n')
+        else:
+            pass
+        for i in atom_symbol:
+            type.write(str(type_dict[i]) + '\n')
+
     '''type_map.raw format:
 
     atom_symbol_1 atom_symbol_2 ...
@@ -73,8 +100,8 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, append=True
             type.write('\n')
         else:
             pass
-        for i in range(0, len(coords)):
-            type.write(atom_symbol[i] + ' ')
+        for i in range(0, len(_atom_symbol)):
+            type.write(_atom_symbol[i] + '\n')
 
     '''coord.raw format:
     

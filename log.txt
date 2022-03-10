@@ -14,3 +14,7 @@ To be done:
 The all i/o operation can be wrapped in one file.
 
 ############################################################################################
+3/10
+Need to be done:
+1. Add selecting function for pbc or nopbc in ML_engine class and Data class
+2. Modify data preparation part in Data class
