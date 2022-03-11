@@ -22,12 +22,6 @@ class DeePMD(object):
             engine_path = '~/deepmd-kit/'
         self.engine_path = engine_path
 
-    def make_npy(self, frame=None):
-        assert frame is not None, 'Please specify the number of frames for a system'
-        print("ML_engine.py 27: frame", frame)
-        make = subprocess.run('%s'%self.engine_path+'data/raw/raw_to_set.sh %d'%frame, shell=True)
-        assert make.returncode == 0, 'An error occurred during preparing npy file process.'
-
     def training(self):
         train = subprocess.run('dp train input.json', shell=True)
         assert train.returncode == 0, 'An error occurred during training process.'
@@ -36,7 +30,11 @@ class DeePMD(object):
         freeze = subprocess.run('dp freeze -o graph.pb', shell=True)
         assert freeze.returncode == 0, 'An error occurred during freezing process.'
 
-    def run(self, frame=None):
-        self.make_npy(frame=frame)
+    def compress(self):
+        compress = subprocess.sun('dp compress -i graph.pb -o graph-compress.pb', shell=True)
+        assert compress.returncode == 0, 'An error occurred during compressing process.'
+
+    def run(self):
         self.training()
+        self.compress()
         self.freeze()

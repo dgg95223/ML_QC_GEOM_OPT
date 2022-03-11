@@ -43,7 +43,7 @@
 
     "training" : {
 	"training_data": {
-	    "systems":		["./"],
+	    "systems":		["./data/dpmd_raw2/"],
 	    "batch_size":	"auto",
 	    "_comment":		"that's all"
 	},

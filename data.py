@@ -1,5 +1,5 @@
 '''Functions dealing with i/o operations'''
-from asyncio import subprocess
+import subprocess, os
 import numpy as np
 
 def read_xyz(xyz_path, index=None):
@@ -55,16 +55,18 @@ def write_xyz(xyz_path, atom_num, atoms):
                                                     np.float64(atom[2]),
                                                     np.float64(atom[3])))
 
-def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, append=True):
+def dump_deepmd_raw(work_path, atom_symbol, coords, energy, forces, pbc=False, append=True):
+    raw_path = work_path+'raw/'
+    have_raw_path = os.path.exists(raw_path)
+    if have_raw_path:
+        pass
+    else:
+        os.makedirs(raw_path)
+
     if append is False:
         mode = 'w+'
     else:
         mode = 'a+'
-
-    if pbc is False:
-        with open('nopbc', 'w') as pbc:
-            pbc.write('')
-        
 
     _atom_symbol = list(set(atom_symbol))  # a list of atom symbol without repeating element
     type_dict = {}
@@ -79,13 +81,13 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, 
     atom_index_n: str, the index of atom
     '''
 
-    with open(work_path + 'type.raw', mode) as type:
+    with open(raw_path + 'type.raw', mode) as type:
         if mode == 'a+':
             type.write('\n')
         else:
             pass
         for i in atom_symbol:
-            type.write(str(type_dict[i]) + '\n')
+            type.write(str(type_dict[i]) + '')
 
     '''type_map.raw format:
 
@@ -95,13 +97,13 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, 
     atom_symbol_n: str, the symbol of atom
     '''
 
-    with open(work_path + 'type_amp.raw', mode) as type:
+    with open(raw_path + 'type_amp.raw', mode) as type:
         if mode == 'a+':
             type.write('\n')
         else:
             pass
         for i in range(0, len(_atom_symbol)):
-            type.write(_atom_symbol[i] + '\n')
+            type.write(_atom_symbol[i] + '')
 
     '''coord.raw format:
     
@@ -110,7 +112,7 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, 
     coord_x_n, coord_y_n, coord_z_n: float, 3 components of coordinates of an atom
     Each line contains coordinates of all atoms in one frame
     '''
-    with open(work_path + 'coord.raw', mode) as coord:
+    with open(raw_path + 'coord.raw', mode) as coord:
         if mode == 'a+':
             coord.write('\n')
         else:
@@ -124,7 +126,7 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, 
 
     energy_n: float, total energy of a system
     '''
-    with open(work_path + 'energy.raw', mode) as ene:
+    with open(raw_path + 'energy.raw', mode) as ene:
         if mode == 'a+':
             ene.write('\n')
         else:
@@ -137,13 +139,39 @@ def write_raw_deepmd(work_path, atom_symbol, coords, energy, forces, pbc=False, 
 
     force_x_n, force_y_n, force_z_n: float, 3 components of force of an atom
     '''
-    with open(work_path + 'force.raw', mode) as force:
+    with open(raw_path + 'force.raw', mode) as force:
         if mode == 'a+':
             force.write('\n')
         else:
             pass
         for i in forces.flatten():
             force.write('%20.15f'%i + ' ')
+
+    if pbc is False:
+        with open(raw_path+'nopbc', 'w') as pbc:
+            pass
+    else: # PBC is not implemented
+        pass
+
+def dump_deepmd_npy(work_path, atom_symbol, coords, energy, forces, pbc=False, append=True):
+    npy_path = work_path+'raw/set.000/'
+    have_npy_path = os.path.exists(npy_path)
+    if have_npy_path:
+        pass
+    else:
+        os.makedirs(npy_path)
+    
+    have_npy_path = os.path.exists(npy_path)
+
+    if append is False:
+        mode = 'w+'
+    else:
+        mode = 'a+'
+
+    if pbc is False:
+        pass
+    else: # PBC is not implemented
+        pass
 
 class Data():
     '''This class control the data communication between QC engine and ML engine'''
@@ -200,7 +228,8 @@ class PySCFdata():# the input obect may need to be modified 1/22/2022
             self.dump_to_deepmd(append=append)
 
     def dump_to_deepmd(self, append=True): # dump pyscf data to raw file for deepmd-kit  
-        write_raw_deepmd(self.work_path,
+
+        dump_raw_deepmd(self.work_path+'raw/',
                          self.atom_symbol,
                          self.coords * self.length_convert,
                          self.energy * self.energy_convert,
