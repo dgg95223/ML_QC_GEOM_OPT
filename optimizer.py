@@ -1,6 +1,7 @@
 '''Geometry optimization module of ASE'''
 
 from ase.io import read, write
+from data import xyz_write_check
 
 class Optimizer():
     def __init__(self, xyz_path=None, work_path=None, ml_engine=None, outter_cycle=None, algorithm=None, max_opt_cycle=None):
@@ -38,11 +39,11 @@ class Optimizer():
         For current implementation, each geometry is read/written in a single xyz file, an aternative way
         is to write all geometries in one file.
         '''
-        
-        atoms_obj = read(self.xyz_path, index=self.cycle + 1)
+        atoms_obj = read(self.xyz_path)
         return atoms_obj
 
     def ase_write_xyz(self, atom_obj):
+        xyz_write_check(self.xyz_path)
         write(self.xyz_path, atom_obj, append=True)
 
     def run_opt(self, ml_engine):
@@ -63,13 +64,13 @@ class Optimizer():
         _atoms = self.ase_read_xyz()
         if ml_engine.lower() == 'deepmd':
             from deepmd.calculator import DP
-            _atoms.calc = DP(model=self.pes_file_path)
+            _atoms.calc = DP(model=self.pes_file_path+'graph-compress.pb')
         opt = optimizer(_atoms)
-        opt.run() # probably need to set 'fmax'
+        opt.run(fmax=1e-6) # probably need to set 'fmax'
 
         self.ase_write_xyz(_atoms)
         self.geom_opt = _atoms.get_positions()
-        self.ene_opt  = _atoms.get_potential.energy()
+        self.ene_opt  = _atoms.get_potential_energy()
 
 
         

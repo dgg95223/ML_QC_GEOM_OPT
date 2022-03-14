@@ -1,29 +1,28 @@
+from curses import raw
+from operator import sub
 import subprocess
 
-class MLEngine(object):
-    def __init__(self, work_path=None, ml_engine=None, engine_path=None):
+class MLEngine():
+    def __init__(self, work_path=None, ml_engine=None):
         assert ml_engine is not None, 'Please specify which QC engine to use.'
         assert work_path is not None, 'Please specify the path of xyz file.'
         
         self.work_path = work_path # work_path is the path of raw files for ML engine
         if ml_engine.lower()== 'deepmd':
             self.engine = DeePMD
-            self.engine_path = engine_path
 
     def build(self):
-        return self.engine(work_path=self.work_path, engine_path=self.engine_path)
+        return self.engine(work_path=self.work_path)
 
-class DeePMD(object):
-    def __init__(self, work_path=None, engine_path=None):
+class DeePMD():
+    def __init__(self, work_path=None):
         assert work_path is not None, 'Please specify the working directory.'
-
-        self.work_path = work_path
-        if engine_path is None:
-            engine_path = '~/deepmd-kit/'
-        self.engine_path = engine_path
+        self.work_path  = work_path
+        self.raw_path   = work_path+'raw/'
+        self.input_path = work_path+'input.json'
 
     def training(self):
-        train = subprocess.run('dp train input.json', shell=True)
+        train = subprocess.run('dp train %s'%self.input_path, shell=True)
         assert train.returncode == 0, 'An error occurred during training process.'
     
     def freeze(self):
@@ -31,10 +30,13 @@ class DeePMD(object):
         assert freeze.returncode == 0, 'An error occurred during freezing process.'
 
     def compress(self):
-        compress = subprocess.sun('dp compress -i graph.pb -o graph-compress.pb', shell=True)
+        compress = subprocess.run('dp compress -i graph.pb -o graph-compress.pb', shell=True)
         assert compress.returncode == 0, 'An error occurred during compressing process.'
 
     def run(self):
+        # subprocess.run('cd '+self.raw_path, shell=True)
+        # subprocess.run('pwd', shell=True)
         self.training()
-        self.compress()
         self.freeze()
+        self.compress()
+        # subprocess.run('cd ..', shell=True)

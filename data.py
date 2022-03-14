@@ -1,8 +1,16 @@
 '''Functions dealing with i/o operations'''
-from ast import Try
+
 import subprocess, os
 import numpy as np
 
+def xyz_write_check(xyz_path):
+    with open(xyz_path,'r+') as xyz:
+        last_line = xyz.readlines()[-1]
+        if last_line[-1] != '\n':
+            xyz.write('\n')
+        else:
+            pass
+        
 def read_xyz(xyz_path, index=None):
     '''Read geometry from a xyz file with multiple geometries'''
     # One geometry in one xyz file
@@ -81,14 +89,16 @@ def dump_deepmd_raw(work_path, atom_symbol, coords, energy, forces, pbc=False, a
     n            : integer, the index of atom
     atom_index_n: str, the index of atom
     '''
-
-    with open(raw_path + 'type.raw', mode) as type:
-        if mode == 'a+':
-            type.write('\n')
-        else:
-            pass
-        for i in atom_symbol:
-            type.write(str(type_dict[i]) + '')
+    if os.path.exists(raw_path+'type.raw'):
+        pass
+    else:
+        with open(raw_path + 'type.raw', mode) as type:
+            if mode == 'a+':
+                type.write('\n')
+            else:
+                pass
+            for i in atom_symbol:
+                type.write(str(type_dict[i]) + ' ')
 
     '''type_map.raw format:
 
@@ -97,14 +107,16 @@ def dump_deepmd_raw(work_path, atom_symbol, coords, energy, forces, pbc=False, a
     n            : integer, the index of atom
     atom_symbol_n: str, the symbol of atom
     '''
-
-    with open(raw_path + 'type_amp.raw', mode) as type:
-        if mode == 'a+':
-            type.write('\n')
-        else:
-            pass
-        for i in range(0, len(_atom_symbol)):
-            type.write(_atom_symbol[i] + '')
+    if os.path.exists(raw_path+'type_amp.raw'):
+        pass
+    else:
+        with open(raw_path + 'type_amp.raw', mode) as type:
+            if mode == 'a+':
+                type.write('\n')
+            else:
+                pass
+            for i in range(0, len(_atom_symbol)):
+                type.write(_atom_symbol[i] + ' ')
 
     '''coord.raw format:
     
@@ -166,11 +178,11 @@ def dump_deepmd_npy(work_path, pbc=False):
     
     coord = np.loadtxt(raw_path+'coord.raw')
     energy = np.loadtxt(raw_path+'energy.raw')
-    forces = np.loadtxt(raw_path+'forces.raw')
+    forces = np.loadtxt(raw_path+'force.raw')
 
     np.save(npy_path+'coord.npy', coord)
     np.save(npy_path+'energy.npy', energy)
-    np.save(npy_path+'forces.npy', forces)
+    np.save(npy_path+'force.npy', forces)
 
     if pbc is True:
         raise NotImplemented

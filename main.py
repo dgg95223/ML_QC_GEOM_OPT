@@ -1,6 +1,6 @@
 #'''This code is the main frame of the interface.'''
 
-import subprocess
+import os
 import logging
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,9 @@ class MLgeomopt():
 		if xyz_path is None:
 			logger.warning('No path of xyz file is specified, the current path will be used as the default path.')
 			current_path = './'
-			self.xyz_path = subprocess.run('ls '+current_path+'*xyz', shell=True)
+			for i in os.path.listdir(current_path):
+				if 'xyz' in i:
+					self.xyz_path = current_path + i
 		else:
 			self.xyz_path = xyz_path
 
@@ -45,12 +47,12 @@ class MLgeomopt():
 		else:
 			self.consistensy_tol = consistensy_tol
 
-		self.algorithm = None
+		self.opt_algorithm = None
 		self.max_opt_cycle = None
 		self.engine_path = None
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
-		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy
+		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy_tol
 		return consistensy_met
 
 	def kernel(self):
@@ -69,8 +71,13 @@ class MLgeomopt():
 		append = True
 		iter = 1
 		while consistensy is not True and iter < self.max_opt_cycle:
-			ML = ML_engine.MLEngine(work_path=self.work_path, ml_engine=self.ml_engine, engine_path=self.engine_path).build()
-			ML.run(frame=iter)
+			print('''
+			###########################################
+			###     Optimization cycle: %5d       ###
+			###########################################
+			'''%iter)
+			ML = ML_engine.MLEngine(work_path=self.work_path, ml_engine=self.ml_engine).build()
+			ML.run()
 
 			Opt = optimizer.Optimizer(xyz_path=self.xyz_path,
 									work_path=self.work_path,
@@ -82,12 +89,15 @@ class MLgeomopt():
 			Opt.run_opt(self.ml_engine)
 			E_ML = Opt.ene_opt
 			coord_ml_opt = Opt.geom_opt
+			print('main.py 92:', coord_ml_opt)
 			QC.update_coord(coord_ml_opt)
+			print('main.py 94:', QC.coords)
 			E_QC, G_QC = QC.calc_new()
 
 			consistensy = self.check_consistensy(E_ML, E_QC)
-			data.build(QC)
-			data.dump(append=append)
+			data1.dump(append=append)
 			iter += 1
+			break
+
 
 		self.opt_geom = coord_ml_opt
