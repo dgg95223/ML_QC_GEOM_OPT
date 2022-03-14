@@ -1,4 +1,5 @@
 '''Functions dealing with i/o operations'''
+from ast import Try
 import subprocess, os
 import numpy as np
 
@@ -153,25 +154,25 @@ def dump_deepmd_raw(work_path, atom_symbol, coords, energy, forces, pbc=False, a
     else: # PBC is not implemented
         pass
 
-def dump_deepmd_npy(work_path, atom_symbol, coords, energy, forces, pbc=False, append=True):
-    npy_path = work_path+'raw/set.000/'
+def dump_deepmd_npy(work_path, pbc=False):
+    if pbc is True:
+        raise NotImplemented
+
+    raw_path = work_path+'raw/'
+    npy_path = work_path+'raw/set.000/'  # need to be improved in the future
     have_npy_path = os.path.exists(npy_path)
     if have_npy_path:
         pass
     else:
         os.makedirs(npy_path)
     
-    have_npy_path = os.path.exists(npy_path)
+    coord = np.loadtxt(raw_path+'coord.raw')
+    energy = np.loadtxt(raw_path+'energy.raw')
+    forces = np.loadtxt(raw_path+'forces.raw')
 
-    if append is False:
-        mode = 'w+'
-    else:
-        mode = 'a+'
-
-    if pbc is False:
-        pass
-    else: # PBC is not implemented
-        pass
+    np.save(npy_path+'coord.npy', coord)
+    np.save(npy_path+'energy.npy', energy)
+    np.save(npy_path+'forces.npy', forces)
 
 class Data():
     '''This class control the data communication between QC engine and ML engine'''
@@ -229,12 +230,14 @@ class PySCFdata():# the input obect may need to be modified 1/22/2022
 
     def dump_to_deepmd(self, append=True): # dump pyscf data to raw file for deepmd-kit  
 
-        dump_raw_deepmd(self.work_path+'raw/',
+        dump_deepmd_raw(self.work_path,
                          self.atom_symbol,
                          self.coords * self.length_convert,
                          self.energy * self.energy_convert,
                          self.forces * self.force_convert, 
                          append=append)
+        dump_deepmd_npy(self.work_path, pbc=False)
+        
 class Gaussiandata():
     def __init__(self):
         pass
