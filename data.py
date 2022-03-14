@@ -155,8 +155,6 @@ def dump_deepmd_raw(work_path, atom_symbol, coords, energy, forces, pbc=False, a
         pass
 
 def dump_deepmd_npy(work_path, pbc=False):
-    if pbc is True:
-        raise NotImplemented
 
     raw_path = work_path+'raw/'
     npy_path = work_path+'raw/set.000/'  # need to be improved in the future
@@ -173,6 +171,9 @@ def dump_deepmd_npy(work_path, pbc=False):
     np.save(npy_path+'coord.npy', coord)
     np.save(npy_path+'energy.npy', energy)
     np.save(npy_path+'forces.npy', forces)
+
+    if pbc is True:
+        raise NotImplemented
 
 class Data():
     '''This class control the data communication between QC engine and ML engine'''
@@ -237,7 +238,7 @@ class PySCFdata():# the input obect may need to be modified 1/22/2022
                          self.forces * self.force_convert, 
                          append=append)
         dump_deepmd_npy(self.work_path, pbc=False)
-        
+
 class Gaussiandata():
     def __init__(self):
         pass
