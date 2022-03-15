@@ -105,6 +105,7 @@ class PySCF(): # moleclue is the Mole object of gto module
     def calc_new(self):
         # run calculation
         self.build_mf_object()
+        # print('QC_engine.py 108:',self.mf.mol.atom_coords())
         self.mf.kernel()
         self.check_scf_converge()
 
@@ -114,8 +115,9 @@ class PySCF(): # moleclue is the Mole object of gto module
         return self.e_tot, self.force
 
     def update_coord(self, new_coord):
-        self.mol = self.mol.set_geom_(new_coord / BOHR, inplace=True)
-        print('QC_engine.py 118:', self.mol.atom_coords()*BOHR)
+        self.mol = self.mol.set_geom_(new_coord)
+        self.coords = self.mol.atom_coords()
+        # print('QC_engine.py 118:', self.mol.atom_coords()*BOHR)
         # self.mf.reset(self.mol)
 
 class Gaussian(object):

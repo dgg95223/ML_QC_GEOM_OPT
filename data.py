@@ -234,8 +234,11 @@ class PySCFdata():# the input obect may need to be modified 1/22/2022
         # data conversion 
         if self.ML_engine.lower() == 'deepmd':
             self.length_convert = bohr2ang
+            # print('data.py 237:',bohr2ang)
             self.energy_convert = hartree2eV
+            # print('data.py 239:',hartree2eV)
             self.force_convert  = hartree2eV / bohr2ang
+            # print('data.py 241:',hartree2eV / bohr2ang)
 
     def dump(self, append=True): # dump pyscf data to raw file for ML engine
         if self.ML_engine.lower() == 'deepmd':

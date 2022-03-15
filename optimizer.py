@@ -32,6 +32,8 @@ class Optimizer():
             self.max_opt_cycle = max_opt_cycle
 
         self.geom_opt = None
+        self.conv_tol = None
+        self.global_temp = None
 
 
     def ase_read_xyz(self): # Build 'Atoms'object from xyz file, a xyz file may contain multiple geometries
@@ -51,22 +53,43 @@ class Optimizer():
         '''
         if self.geom_opt_algorithm == 'bfgs':
             from ase.optimize import BFGS
-            optimizer = BFGS
+            optimizer_ = BFGS
         elif self.geom_opt_algorithm == 'lbfgs':
             from ase.optimize import LBFGS
-            optimizer = LBFGS
+            optimizer_ = LBFGS
         elif self.geom_opt_algorithm == 'gpmin':
             from ase.optimize import GPMin
-            optimizer = GPMin
+            optimizer_ = GPMin
+        elif self.geom_opt_algorithm == 'basin':
+            from ase.optimize.basin import BasinHopping
+            optimizer_ = BasinHopping
         else:
             raise(NotImplementedError)
+
+        if self.geom_opt_algorithm == 'basin':
+            opt_global = True
+            if self.global_temp is None:
+                self.global_temp = 100
 
         _atoms = self.ase_read_xyz()
         if ml_engine.lower() == 'deepmd':
             from deepmd.calculator import DP
             _atoms.calc = DP(model=self.pes_file_path+'graph-compress.pb')
-        opt = optimizer(_atoms)
-        opt.run(fmax=1e-6) # probably need to set 'fmax'
+
+        if opt_global is not True:
+            # local optimization
+            opt = optimizer_(_atoms)
+            opt.run(fmax=self.conv_tol) # probably need to set 'fmax'
+        # global optimization
+        else:
+            from ase.units import kB
+            opt = optimizer_(atoms=_atoms,           # the system to optimize
+                  temperature=self.global_temp * kB, # 'temperature' to overcome barriers
+                  dr=0.5,                            # maximal stepwidth
+                  optimizer=optimizer_,              # optimizer to find local minima
+                  fmax=self.conv_tol,                # maximal force for the optimizer
+                  )
+
 
         self.ase_write_xyz(_atoms)
         self.geom_opt = _atoms.get_positions()

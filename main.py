@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import data, QC_engine, ML_engine, optimizer
+from pyscf.data.nist import BOHR ,HARTREE2EV
 import numpy as np
 
 
@@ -40,19 +41,23 @@ class MLgeomopt():
 
 		self.qcsetting = qcsetting
 
-		if consistensy_tol is None:
-			consistensy_tol = 1e-6
+		if consistensy_tol is None: 
+			consistensy_tol = 0.00045 * HARTREE2EV / BOHR # 0.00045 is from Gaussian
 			logger.warning('No convergence tolarence is specified, default tolarence %12.11f will be used'%consistensy_tol)
 			self.consistensy_tol = consistensy_tol
 		else:
 			self.consistensy_tol = consistensy_tol
 
 		self.opt_algorithm = None
+		self.global_temp   = None
 		self.max_opt_cycle = None
-		self.engine_path = None
+		self.engine_path   = None
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy_tol
+		# debug
+		with open(self.work_path+'debug.txt', 'a+') as d:
+			d.write('%20.12f    %20.12f    %20.12f\n'%(QC_opt_ene, ML_opt_ene, QC_opt_ene - ML_opt_ene))
 		return consistensy_met
 
 	def kernel(self):
@@ -73,7 +78,7 @@ class MLgeomopt():
 		while consistensy is not True and iter < self.max_opt_cycle:
 			print('''
 			###########################################
-			###     Optimization cycle: %5d       ###
+			###      Optimization cycle: %5d      ###
 			###########################################
 			'''%iter)
 			ML = ML_engine.MLEngine(work_path=self.work_path, ml_engine=self.ml_engine).build()
@@ -85,19 +90,23 @@ class MLgeomopt():
 									outter_cycle=iter,
 									algorithm=self.opt_algorithm,
 									max_opt_cycle=self.max_opt_cycle)
-
+			
+			Opt.conv_tol    = self.consistensy_tol
+			Opt.global_temp = self.global_temp
 			Opt.run_opt(self.ml_engine)
 			E_ML = Opt.ene_opt
 			coord_ml_opt = Opt.geom_opt
-			print('main.py 92:', coord_ml_opt)
+			# print('main.py 92:', coord_ml_opt)
 			QC.update_coord(coord_ml_opt)
-			print('main.py 94:', QC.coords)
+			# print('main.py 94:', QC.mol.atom_coords())
 			E_QC, G_QC = QC.calc_new()
+			# print('main.py 96:', E_QC)
 
-			consistensy = self.check_consistensy(E_ML, E_QC)
+			consistensy = self.check_consistensy(E_ML, E_QC * HARTREE2EV)
+			data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
 			data1.dump(append=append)
 			iter += 1
-			break
+			# break
 
 
 		self.opt_geom = coord_ml_opt
