@@ -62,6 +62,7 @@ class Optimizer():
             optimizer_ = GPMin
         elif self.geom_opt_algorithm == 'basin':
             from ase.optimize.basin import BasinHopping
+            from ase.optimize import LBFGS
             optimizer_ = BasinHopping
         else:
             raise(NotImplementedError)
@@ -79,14 +80,15 @@ class Optimizer():
         if opt_global is not True:
             # local optimization
             opt = optimizer_(_atoms)
-            opt.run(fmax=self.conv_tol) # probably need to set 'fmax'
-        # global optimization
+            opt.run(fmax=self.conv_tol)
+            
         else:
-            from ase.units import kB
+            # global optimization
+            from ase.units import kB           # need further tset 3/15/2022
             opt = optimizer_(atoms=_atoms,           # the system to optimize
                   temperature=self.global_temp * kB, # 'temperature' to overcome barriers
                   dr=0.5,                            # maximal stepwidth
-                  optimizer=optimizer_,              # optimizer to find local minima
+                  optimizer=LBFGS,              # optimizer to find local minima
                   fmax=self.conv_tol,                # maximal force for the optimizer
                   )
 
