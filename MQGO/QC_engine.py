@@ -3,7 +3,7 @@
 import numpy as np
 from pyscf import gto, scf, dft, grad
 from pyscf.data.nist import BOHR
-from data import read_xyz
+from MQGO.data import read_xyz
 
 class QCEngine(): 
     def __init__(self, qc_engine=None, xyz_path=None, **setting):

@@ -1,6 +1,6 @@
 '''Functions dealing with i/o operations'''
 
-import os
+import subprocess, os
 import numpy as np
 
 def xyz_write_check(xyz_path):

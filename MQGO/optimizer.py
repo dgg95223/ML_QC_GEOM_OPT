@@ -1,7 +1,7 @@
 '''Geometry optimization module of ASE'''
 
 from ase.io import read, write
-from MQGO.data import xyz_write_check
+from data import xyz_write_check
 
 class Optimizer():
     def __init__(self, xyz_path=None, work_path=None, ml_engine=None, outter_cycle=None, algorithm=None, max_opt_cycle=None):

@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from MQGO import data, QC_engine, ML_engine, optimizer
+import data, QC_engine, ML_engine, optimizer
 from pyscf.data.nist import BOHR ,HARTREE2EV
 import numpy as np
 
@@ -33,17 +33,9 @@ class MLgeomopt():
 		if xyz_path is None:
 			logger.warning('No path of xyz file is specified, the current path will be used as the default path.')
 			current_path = './'
-			xyzs = [i for i in os.path.listdir(current_path) if 'xyz' in i]
-			if len(xyzs) > 1:
-				logger.warning('There are mutiple xyz files in the folder, %s will be set as default'%xyzs[0])
-				self.xyz_paths = []
-				for i in xyzs:
-					self.xyz_paths.append(current_path + i)
-			
-			self.xyz_path = xyzs[0]
-			# for i in os.path.listdir(current_path):
-			# 	if 'xyz' in i:
-					# self.xyz_path = current_path + i
+			for i in os.path.listdir(current_path):
+				if 'xyz' in i:
+					self.xyz_path = current_path + i
 		else:
 			self.xyz_path = xyz_path
 

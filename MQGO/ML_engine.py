@@ -1,5 +1,3 @@
-from curses import raw
-from operator import sub
 import subprocess
 
 class MLEngine():
@@ -34,9 +32,8 @@ class DeePMD():
         assert compress.returncode == 0, 'An error occurred during compressing process.'
 
     def run(self):
-        # subprocess.run('cd '+self.raw_path, shell=True)
-        # subprocess.run('pwd', shell=True)
+
         self.training()
         self.freeze()
         self.compress()
-        # subprocess.run('cd ..', shell=True)
+

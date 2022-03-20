@@ -33,3 +33,18 @@ Memo:
 2. Add global optimization support for ase optimizer
 3. Find out the possible reason of the abnormal results of optimization (The energy of 
    optimized geometry goes further from the expected geometry.)
+
+############################################################################################
+3/20
+Memo:
+Issue: There is an obvious deviation between the DFT PES and the ML PES. Currently, it essentially 
+        fits the optimized ML geometry to the DFT PES which is not the right way to optimize the
+        geometry.
+Probably reasons: 1. the inital geometry is too good so that the bad guess of ML PES leads to 
+                    the wrong direction of optimization. More tests with more configurations
+                    should be tried.
+                  2. the current optimizaition scheme may have intrinsic problemss. To imporve it, 
+                    the GPR paper may give some hints.
+To be done:
+1. Finalized the global optimization part in optimizer.py.
+2. Fix some bugs in main.py related to setting conv_tol for opt and consistensy check.
