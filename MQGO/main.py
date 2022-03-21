@@ -1,11 +1,11 @@
-#'''This code is the main frame of the interface.'''
+'''This code is the main frame of the interface.'''
 
 import os
 import logging
 
 logger = logging.getLogger(__name__)
 
-import data, QC_engine, ML_engine, optimizer
+from MQGO import data, QC_engine, ML_engine, optimizer
 from pyscf.data.nist import BOHR ,HARTREE2EV
 import numpy as np
 
@@ -33,9 +33,17 @@ class MLgeomopt():
 		if xyz_path is None:
 			logger.warning('No path of xyz file is specified, the current path will be used as the default path.')
 			current_path = './'
-			for i in os.path.listdir(current_path):
-				if 'xyz' in i:
-					self.xyz_path = current_path + i
+			xyzs = [i for i in os.path.listdir(current_path) if 'xyz' in i]
+			if len(xyzs) > 1:
+				logger.warning('There are mutiple xyz files in the folder, %s will be set as default'%xyzs[0])
+				self.xyz_paths = []
+				for i in xyzs:
+					self.xyz_paths.append(current_path + i)
+			
+			self.xyz_path = xyzs[0]
+			# for i in os.path.listdir(current_path):
+			# 	if 'xyz' in i:
+					# self.xyz_path = current_path + i
 		else:
 			self.xyz_path = xyz_path
 
@@ -58,7 +66,7 @@ class MLgeomopt():
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy_tol
 		# debug
 		with open(self.work_path+'debug.txt', 'a+') as d:
-			d.write('%20.12f    %20.12f    %20.12f\n    consistent?: %s'%(QC_opt_ene, ML_opt_ene, QC_opt_ene - ML_opt_ene, consistensy_met))
+			d.write('%20.12f    %20.12f    %20.12f    consistent?: %s\n'%(QC_opt_ene, ML_opt_ene, QC_opt_ene - ML_opt_ene, consistensy_met))
 		return consistensy_met
 
 	def kernel(self):
