@@ -1,7 +1,7 @@
 {
     "_comment": " model parameters",
     "model": {
-	"type_map":	["O", "H"],
+	"type_map":	["Cd", "Se"],
 	"descriptor" :{
 	    "type":		"se_e2_a",
 	    "sel":		[46, 92],

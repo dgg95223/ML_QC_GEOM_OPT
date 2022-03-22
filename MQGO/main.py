@@ -50,7 +50,8 @@ class MLgeomopt():
 		self.qcsetting = qcsetting
 
 		if consistensy_tol is None: 
-			consistensy_tol = 0.00045 * HARTREE2EV / BOHR # 0.00045 is from Gaussian
+			# consistensy_tol = 0.00045 * HARTREE2EV / BOHR # 0.00045 is from Gaussian
+			consistensy_tol = 0.1 # eV
 			logger.warning('No convergence tolarence is specified, default tolarence %12.11f will be used'%consistensy_tol)
 			self.consistensy_tol = consistensy_tol
 		else:
@@ -73,6 +74,8 @@ class MLgeomopt():
 		# initialization
 		if self.max_opt_cycle is None:
 			self.max_opt_cycle = 100
+		if self.opt_conv is None:
+			self.opt_conv = 0.00045 * HARTREE2EV / BOHR # 0.00045 is from Gaussian
 		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
 		E_QC, G_QC = QC.calc_new()
 		
@@ -100,7 +103,7 @@ class MLgeomopt():
 									algorithm=self.opt_algorithm,
 									max_opt_cycle=self.max_opt_cycle)
 			
-			Opt.conv_tol    = self.consistensy_tol
+			Opt.conv_tol    = self.opt_conv
 			Opt.global_temp = self.global_temp
 			Opt.run_opt(self.ml_engine)
 			E_ML = Opt.ene_opt
