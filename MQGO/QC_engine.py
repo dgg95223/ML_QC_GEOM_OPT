@@ -67,13 +67,14 @@ class PySCF(): # moleclue is the Mole object of gto module
         self.e_tot  = None
         self.force  = None
         self.coords = self.mol.atom_coords()
+        self.dm0    = None
 
     def build_mf_object(self):
         '''Build mf object for DFT or HF calculation''' # TDSCF calculation support can be done in the future 3/8/2022
         # check setting
         scf_basic_keys = ['xc', 'restricted'] # key restricted is bool
-        scf_advance_keys = ['conv_tol', 'max_cycle', 'verbose', 'grids.level']
-        scf_default_dict = {'conv_tol':1e-12, 'max_cycle':100, 'verbose':0, 'grids.level':3}
+        scf_advance_keys = ['conv_tol', 'max_cycle', 'verbose', 'grids.level', 'dm0']
+        scf_default_dict = {'conv_tol':1e-12, 'max_cycle':100, 'verbose':0, 'grids.level':3, 'dm0':None}
         for key in scf_basic_keys:
             assert key in self.keys, "Keyword '%s' mmust be specified, please check setting."%(key)
 
@@ -94,10 +95,10 @@ class PySCF(): # moleclue is the Mole object of gto module
             elif self.setting['restricted'] == False or self.setting['restricted'] == 0:
                 self.mf = scf.UHF(self.mol)
 
-        self.mf.conv_tol   = self.setting['conv_tol']
-        self.mf.max_cycle  = self.setting['max_cycle']
-        self.mf.verbose    = self.setting['verbose']
-        # self.mf.grids.level = self.setting['grids.level']            
+        self.mf.conv_tol    = self.setting['conv_tol']
+        self.mf.max_cycle   = self.setting['max_cycle']
+        self.mf.verbose     = self.setting['verbose']
+        self.mf.grids.level = self.setting['grids.level']            
 
     def check_scf_converge(self):
         assert self.mf.converged is True, 'SCF is not converged, please modify related paramaters and rerun the calculations.'
@@ -106,7 +107,10 @@ class PySCF(): # moleclue is the Mole object of gto module
         # run calculation
         self.build_mf_object()
         # print('QC_engine.py 108:',self.mf.mol.atom_coords())
-        self.mf.kernel()
+        self.mf.kernel(dm0=self.dm0)
+        if self.setting['dm0'] is not None:
+            self.dm0 = self.mf.make_rdm1()
+            
         self.check_scf_converge()
 
         self.e_tot = self.mf.e_tot

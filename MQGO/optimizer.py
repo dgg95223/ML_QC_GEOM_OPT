@@ -74,6 +74,7 @@ class Optimizer():
                 self.global_temp = 100
 
         _atoms = self.ase_read_xyz()
+        print('optimizer.py 77:', _atoms.get_positions())
         if ml_engine.lower() == 'deepmd':
             from deepmd.calculator import DP
             _atoms.calc = DP(model=self.pes_file_path+'graph-compress.pb')

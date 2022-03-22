@@ -78,6 +78,7 @@ class MLgeomopt():
 			self.opt_conv = 0.00045 * HARTREE2EV / BOHR # 0.00045 is from Gaussian
 		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
 		E_QC, G_QC = QC.calc_new()
+		print('main.py 81 QC_coords0:', QC.coords)
 		
 		append = False
 		data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
@@ -110,7 +111,7 @@ class MLgeomopt():
 			coord_ml_opt = Opt.geom_opt
 			# print('main.py 92:', coord_ml_opt)
 			QC.update_coord(coord_ml_opt)
-			# print('main.py 94:', QC.mol.atom_coords())
+			print('main.py 94: QC_coords1', QC.mol.atom_coords())
 			E_QC, G_QC = QC.calc_new()
 			# print('main.py 96:', E_QC)
 
