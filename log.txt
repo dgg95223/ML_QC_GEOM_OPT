@@ -40,7 +40,7 @@ Memo:
 Issue: There is an obvious deviation between the DFT PES and the ML PES. Currently, it essentially 
         fits the optimized ML geometry to the DFT PES which is not the right way to optimize the
         geometry.
-Probably reasons: 1. the inital geometry is too good so that the bad guess of ML PES leads to 
+Probable reasons: 1. the inital geometry is too good so that the bad guess of ML PES leads to 
                     the wrong direction of optimization. More tests with more configurations
                     should be tried.
                   2. the current optimizaition scheme may have intrinsic problemss. To imporve it, 
@@ -48,3 +48,15 @@ Probably reasons: 1. the inital geometry is too good so that the bad guess of ML
 To be done:
 1. Finalized the global optimization part in optimizer.py.
 2. Fix some bugs in main.py related to setting conv_tol for opt and consistensy check.
+
+############################################################################################
+3/23
+Memo:
+Issue: The performance of the ML_QC optimizer is not as good as we expected, using Pyberny optimizer 
+        to optimize water molecule, the optimized energy is -75.98 Ha while the ML_QC optimizer gives
+        out -75.82 Ha.
+Probable reasons: 1. During the training process, only the energy data was trained. Maybe the gradient 
+                    data can be trained as the same time.
+                  2. Due to the lack of data, the NN may overfit the data. Additional treat should 
+                    be applied.
+                  3. Changing the loss function from exp to tanh maybe worth a try.

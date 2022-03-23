@@ -1,4 +1,4 @@
-+{
+{
     "_comment": " model parameters",
     "model": {
 	"type_map":	["Cd", "Se"],
@@ -24,7 +24,7 @@
 
     "learning_rate" :{
 	"type":		"exp",
-	"decay_steps":	100,
+	"decay_steps":	1000,
 	"start_lr":	0.001,	
 	"stop_lr":	3.51e-8,
 	"_comment":	"that's all"
@@ -44,7 +44,7 @@
     "training" : {
 	"training_data": {
 	    "systems":		["./raw/"],
-	    "batch_size":	2,
+	    "batch_size":	"auto",
 	    "_comment":		"that's all"
 	},
 

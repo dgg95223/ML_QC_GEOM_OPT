@@ -75,7 +75,7 @@ class MLgeomopt():
 		if self.max_opt_cycle is None:
 			self.max_opt_cycle = 100
 		if self.opt_conv is None:
-			self.opt_conv = 0.00045 * HARTREE2EV / BOHR # 0.00045 is from Gaussian
+			self.opt_conv = 0.00045 #* HARTREE2EV / BOHR # 0.00045 is from Gaussian
 		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
 		E_QC, G_QC = QC.calc_new()
 		print('main.py 81 QC_coords0:', QC.coords)
@@ -83,7 +83,7 @@ class MLgeomopt():
 		append = False
 		data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
 		data1.dump(append=append)
-00
+
 		# loop starts here
 		consistensy = False
 		append = True
