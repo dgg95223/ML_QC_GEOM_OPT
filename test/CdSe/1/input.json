@@ -1,4 +1,4 @@
-{
++{
     "_comment": " model parameters",
     "model": {
 	"type_map":	["Cd", "Se"],
@@ -48,7 +48,7 @@
 	    "_comment":		"that's all"
 	},
 
-	"numb_steps":	1000,
+	"numb_steps":	10000,
 	"seed":		10,
 	"disp_file":	"lcurve.out",
 	"disp_freq":	100,

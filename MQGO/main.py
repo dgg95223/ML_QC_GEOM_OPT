@@ -83,12 +83,12 @@ class MLgeomopt():
 		append = False
 		data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
 		data1.dump(append=append)
-
+00
 		# loop starts here
 		consistensy = False
 		append = True
 		iter = 1
-		while consistensy is not True and iter < self.max_opt_cycle:
+		while (not consistensy) and (iter < self.max_opt_cycle):
 			print('''
 			###########################################
 			###      Optimization cycle: %5d      ###
