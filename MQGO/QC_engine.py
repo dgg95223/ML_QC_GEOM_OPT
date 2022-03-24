@@ -87,9 +87,11 @@ class PySCF(): # moleclue is the Mole object of gto module
             if self.setting['restricted'] == True or self.setting['restricted'] == 1:
                 self.mf = dft.RKS(self.mol)
                 self.mf.xc = self.setting['xc']
+                self.mf.grids.level = self.setting['grids.level'] 
             elif self.setting['restricted'] == False or self.setting['restricted'] == 0:
                 self.mf = dft.UKS(self.mol)
                 self.mf.xc = self.setting['xc']
+                self.mf.grids.level = self.setting['grids.level'] 
         
         elif self.setting['xc'] is None:
             if self.setting['restricted'] == True or self.setting['restricted'] == 1:
@@ -97,12 +99,10 @@ class PySCF(): # moleclue is the Mole object of gto module
             elif self.setting['restricted'] == False or self.setting['restricted'] == 0:
                 self.mf = scf.UHF(self.mol)
 
-        
-
         self.mf.conv_tol    = self.setting['conv_tol']
         self.mf.max_cycle   = self.setting['max_cycle']
         self.mf.verbose     = self.setting['verbose']
-        self.mf.grids.level = self.setting['grids.level']            
+                   
 
     def check_scf_converge(self):
         assert self.mf.converged is True, 'SCF is not converged, please modify related paramaters and rerun the calculations.'

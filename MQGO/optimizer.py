@@ -61,6 +61,9 @@ class Optimizer():
         elif self.geom_opt_algorithm == 'gpmin':
             from ase.optimize import GPMin
             optimizer_ = GPMin
+        elif self.geom_opt_algorithm == 'pyberny':
+            from ase.optimize import Berny
+            optimizer_ = Berny
         elif self.geom_opt_algorithm == 'basin':
             from ase.optimize.basin import BasinHopping
             from ase.optimize import LBFGS
