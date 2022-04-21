@@ -31,8 +31,10 @@ class Optimizer():
         else:
             self.max_opt_cycle = max_opt_cycle
 
-        self.geom_opt = None
-        self.conv_tol = None
+        self.geom_opt    = None
+        self.ene_opt     = None
+        self.force_opt   = None
+        self.conv_tol    = None
         self.global_temp = None
 
 
@@ -99,8 +101,9 @@ class Optimizer():
 
 
         self.ase_write_xyz(_atoms)
-        self.geom_opt = _atoms.get_positions()
-        self.ene_opt  = _atoms.get_potential_energy()
+        self.geom_opt  = _atoms.get_positions()
+        self.ene_opt   = _atoms.get_potential_energy()
+        self.force_opt = _atoms.get_forces()
 
 
         

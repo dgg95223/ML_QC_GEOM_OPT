@@ -110,6 +110,14 @@ class MLgeomopt():
 			Opt.global_temp = self.global_temp
 			Opt.run_opt(self.ml_engine)
 			E_ML = Opt.ene_opt
+			F_ML = Opt.force_opt
+			with open('./debug_ml_opt_force.txt','a') as d:
+				for i in range(0, len(F_ML)):
+					for j in range(0, 3):
+						d.write('%24.18f'%F_ML[i][j])
+					d.write('\n')
+				d.write('\n')
+
 			coord_ml_opt = Opt.geom_opt
 			# print('main.py 92:', coord_ml_opt)
 			QC.update_coord(coord_ml_opt)
