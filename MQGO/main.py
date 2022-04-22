@@ -41,9 +41,6 @@ class MLgeomopt():
 					self.xyz_paths.append(current_path + i)
 			
 			self.xyz_path = xyzs[0]
-			# for i in os.path.listdir(current_path):
-			# 	if 'xyz' in i:
-					# self.xyz_path = current_path + i
 		else:
 			self.xyz_path = xyz_path
 
@@ -62,12 +59,15 @@ class MLgeomopt():
 		self.global_temp   = None
 		self.max_opt_cycle = None
 		self.engine_path   = None
+		
+		self.debug = False
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy_tol
 		# debug
-		with open(self.work_path+'debug.txt', 'a+') as d:
-			d.write('%20.12f    %20.12f    %20.12f    consistent?: %s\n'%(QC_opt_ene, ML_opt_ene, QC_opt_ene - ML_opt_ene, consistensy_met))
+		if self.debug:
+			with open(self.work_path+'debug.txt', 'a+') as d:
+				d.write('%20.12f    %20.12f    %20.12f    consistent?: %s\n'%(QC_opt_ene, ML_opt_ene, QC_opt_ene - ML_opt_ene, consistensy_met))
 		return consistensy_met
 
 	def kernel(self):
@@ -111,17 +111,26 @@ class MLgeomopt():
 			Opt.run_opt(self.ml_engine)
 			E_ML = Opt.ene_opt
 			F_ML = Opt.force_opt
-			with open('./debug_ml_opt_force.txt','a') as d:
-				for i in range(0, len(F_ML)):
-					for j in range(0, 3):
-						d.write('%24.18f'%F_ML[i][j])
-					d.write('\n')
-				d.write('\n')
-
 			coord_ml_opt = Opt.geom_opt
+
+			if self.debug:
+				with open('./debug_ml_opt_force.txt','a+') as d:
+					for i in range(0, len(F_ML)):
+						for j in range(0, 3):
+							d.write('%24.18f'%F_ML[i][j])
+						d.write('\n')
+					d.write('\n')
+
+				with open('./debug_opt_geoms.txt','a+') as d:
+					for i in range(0, len(coord_ml_opt)):
+						for j in range(0, 3):
+							d.write('%24.18f'%coord_ml_opt[i][j])
+						d.write('\n')
+					d.write('\n')
+
 			# print('main.py 92:', coord_ml_opt)
 			QC.update_coord(coord_ml_opt)
-			print('main.py 94: QC_coords1', QC.mol.atom_coords())
+			# print('main.py 94: QC_coords1', QC.mol.atom_coords())
 			E_QC, G_QC = QC.calc_new()
 			# print('main.py 96:', E_QC)
 
@@ -131,5 +140,10 @@ class MLgeomopt():
 			iter += 1
 			# break
 
-
 		self.opt_geom = coord_ml_opt
+
+		if self.debug:
+			with open('./debug_ml_opt_force.txt','a+') as d:
+				d.write('********************\n')
+			with open('./debug_opt_geoms.txt','a+') as d:
+				d.write('********************\n')

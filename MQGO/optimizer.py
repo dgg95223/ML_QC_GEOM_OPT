@@ -104,6 +104,3 @@ class Optimizer():
         self.geom_opt  = _atoms.get_positions()
         self.ene_opt   = _atoms.get_potential_energy()
         self.force_opt = _atoms.get_forces()
-
-
-        
