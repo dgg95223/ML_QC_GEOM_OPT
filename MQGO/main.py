@@ -115,6 +115,7 @@ class MLgeomopt():
 
 			if self.debug:
 				with open('./debug_ml_opt_force.txt','a+') as d:
+					d.write('%24.18f\n'%E_ML)
 					for i in range(0, len(F_ML)):
 						for j in range(0, 3):
 							d.write('%24.18f'%F_ML[i][j])
