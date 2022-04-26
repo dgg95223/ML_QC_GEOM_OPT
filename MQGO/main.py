@@ -61,6 +61,7 @@ class MLgeomopt():
 		self.engine_path   = None
 		
 		self.debug = False
+		self.multi_geom = False
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
 		consistensy_met = np.abs((QC_opt_ene - ML_opt_ene)) < self.consistensy_tol
@@ -78,6 +79,7 @@ class MLgeomopt():
 			self.opt_conv = 0.00045 #* HARTREE2EV / BOHR # 0.00045 is from Gaussian
 		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
 		E_QC, G_QC = QC.calc_new()
+		
 		print('main.py 81 QC_coords0:', QC.coords*BOHR)
 		print('main.py 82 E_QC0:', E_QC*HARTREE2EV)
 		print('main.py 83 G_QC0:', G_QC*HARTREE2EV/BOHR)

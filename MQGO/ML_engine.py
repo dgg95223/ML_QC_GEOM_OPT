@@ -35,5 +35,5 @@ class DeePMD():
 
         self.training()
         self.freeze()
-        # self.compress()
+        self.compress()
 

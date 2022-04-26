@@ -12,7 +12,7 @@ def xyz_write_check(xyz_path):
             pass
         
 def read_xyz(xyz_path, index=None):
-    '''Read geometry from a xyz file with multiple geometries'''
+    '''Read geometry from a xyz file with multiple geometries to a string with atom symbols and coordinates'''
     # One geometry in one xyz file
     # col1 = np.loadtxt(xyz_path, usecols=0, dtype='str')
     # atoms_num = int(col1[0])
@@ -45,6 +45,7 @@ def read_xyz(xyz_path, index=None):
         _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])[:-1]
     else:
         _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])
+
     return atoms_num, atom_symbol, _atoms
 
 def write_xyz(xyz_path, atom_num, atoms):
