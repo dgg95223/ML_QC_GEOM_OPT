@@ -11,42 +11,91 @@ def xyz_write_check(xyz_path):
         else:
             pass
         
-def read_xyz(xyz_path, index=None):
-    '''Read geometry from a xyz file with multiple geometries to a string with atom symbols and coordinates'''
-    # One geometry in one xyz file
-    # col1 = np.loadtxt(xyz_path, usecols=0, dtype='str')
-    # atoms_num = int(col1[0])
-    # atom_symbol = col1[1:]
-    # with open(xyz_path, 'r') as xyz:
-    #     _atoms_  = xyz.readlines()
-    # _atoms = ''.join(_atoms_[2:]) # A string containing atom symbol and coordinates
-    
-    # return atoms_num, atom_symbol, _atoms
-    
-    ####################################################################################
-
-    # Multiple geometries in one xyz file
-    if index is None:
-        index = -1  # read the last geometry as default
-    elif index > 0:
-        index = index - 1
-    elif index == 0:
-        assert index != 0, "'index' should be a natural number"
-
-    with open(xyz_path,'r') as xyz:
+def read_xyz(filename, index=None, output='regular'):
+    '''
+    index: '-1' refers to the last geometry
+           'N' any integar larger than 0, refers to the N^th geometry, '-' refers to count the geometry in reversed order
+           '0' refers to all geometry
+    output mode: 'regular' output atom number, atom symbols, a np.array of coordinates
+                 'pyscf' output atom number, atom symbols, a string includes atom symbols and coordinates  
+    '''
+    with open(filename,'r') as xyz:
         molecules = xyz.readlines()
     
-    atoms_num = int(molecules[0])
-    atom_symbol = np.loadtxt(xyz_path, usecols=0, dtype='str', max_rows=atoms_num+2)[1:]
+    # clear unnecessary empty rows
+    reverse_i = list(range(0, len(molecules)))[::-1]
+    for i in reverse_i:
+        if molecules[i] == '\n':
+            if (len(molecules[i-1]) > 10) or (len(molecules[i-1]) == 1):
+                molecules.pop(i)
 
-    if index == -1:
-        _atoms = ''.join(molecules[index * atoms_num:])
-    elif molecules[(index + 1) * (atoms_num + 2) - 1][-1] == '\n':
-        _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])[:-1]
-    else:
-        _atoms = ''.join(molecules[index * (atoms_num + 2) + 2 :(index + 1) * (atoms_num + 2)])
+    # get the number of atoms in each geometry
+    atoms_num = []
+    ii = 0
+    while ii < len(molecules) :
+        atoms_num.append(int(molecules[ii]))
+        ii += (2 + int(molecules[ii]))
+        if ii == len(molecules):
+            break
 
-    return atoms_num, atom_symbol, _atoms
+    # get the amount of geometries
+    geoms_num = len(atoms_num)
+    atom_symbol = []
+    # get the symbol of atoms in each geometry
+    _atom_symbol = np.loadtxt(filename, usecols=0, dtype='str')
+    start = 1
+    for i in range(0, geoms_num):    
+        end = start + atoms_num[i]
+        atom_symbol.append(_atom_symbol[start:end])
+        start = end + 1
+
+    if index is None:                                                                                           
+        _index = -1  # read the last geometry as default
+    elif index == 0: # read all geometries
+        pass
+    elif index > 0: # read the N^th geometry
+        _index = index - 1
+    elif index <= -1:
+        _index = geoms_num + index 
+
+    if index == 0:
+        # read all geometries
+        geoms = []
+        for i in range(0, geoms_num):
+            if output == 'regular':
+                _geom = []
+                for j in range(0, atoms_num[i]):
+                    _geom_ = molecules[sum(np.add(atoms_num,2)[:i]) + 2 + j].split()[1:4]
+                    _geom.append(_geom_)
+                _geom =np.array(_geom, dtype=np.float64)
+            elif output == 'pyscf':
+                _geom = ''
+                for j in range(0, atoms_num[i]):
+                    _col = molecules[sum(np.add(atoms_num,2)[:i]) + 2 + j].split()[0:4]
+                    _geom_ = '%2s %12s %12s %12s\n'%(_col[0], _col[1], _col[2], _col[3])
+                    _geom += _geom_
+                    # _geom = ''.join(molecules[sum(np.add(atoms_num,2)[:i]) + 2: sum(np.add(atoms_num,2)[:i]) + 2 + atoms_num[i]])
+            geoms.append(_geom)
+    else: 
+        # index == 'N' read the N^th geometry
+        if output == 'regular':
+            _geom = []
+            for j in range(0, atoms_num[_index]):
+                _geom_ = molecules[sum(np.add(atoms_num,2)[:_index]) + 2 + j].split()
+                _geom.append(_geom_[1:4])
+            _geom =np.array(_geom, dtype=np.float64)
+        elif output == 'pyscf':
+            _geom = ''
+            for j in range(0, atoms_num[_index]):
+                _col = molecules[sum(np.add(atoms_num,2)[:_index]) + 2 + j].split()[0:4]
+                _geom_ = '%2s %12s %12s %12s\n'%(_col[0], _col[1], _col[2], _col[3])
+                _geom += _geom_
+            # _geom = ''.join(molecules[sum(np.add(atoms_num,2)[:_index]) + 2: sum(np.add(atoms_num,2)[:_index]) + 2 + atoms_num[_index]])
+        geoms = _geom
+        atoms_num = atoms_num[_index]
+        atom_symbol =atom_symbol[_index]
+    
+    return atoms_num, atom_symbol, geoms
 
 def write_xyz(xyz_path, atom_num, atoms):
     _atoms = np.reshape(atoms.split(), (atom_num,4))   

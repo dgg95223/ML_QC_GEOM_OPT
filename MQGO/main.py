@@ -61,6 +61,7 @@ class MLgeomopt():
 		self.engine_path   = None
 		
 		self.debug = False
+
 		self.multi_geom = False
         
 	def check_consistensy(self, ML_opt_ene, QC_opt_ene):
@@ -77,16 +78,38 @@ class MLgeomopt():
 			self.max_opt_cycle = 100
 		if self.opt_conv is None:
 			self.opt_conv = 0.00045 #* HARTREE2EV / BOHR # 0.00045 is from Gaussian
-		QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
-		E_QC, G_QC = QC.calc_new()
-		
-		print('main.py 81 QC_coords0:', QC.coords*BOHR)
-		print('main.py 82 E_QC0:', E_QC*HARTREE2EV)
-		print('main.py 83 G_QC0:', G_QC*HARTREE2EV/BOHR)
-		
-		append = False
-		data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
-		data1.dump(append=append)
+
+		# prepare initail QC data
+		if self.multi_geom is True: # to be finished -- 2022/4/27
+			atom_num, atom_symbol, coords = data.read_xyz(self.xyz_path, index=0, output='regular')
+			geom_num = len(atom_num)
+			for i in range(0, geom_num):
+				QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
+				E_QC, G_QC = QC.calc_new()
+				
+				print('main.py 81 QC_coords0:', QC.coords*BOHR)
+				print('main.py 82 E_QC0:', E_QC*HARTREE2EV)
+				print('main.py 83 G_QC0:', G_QC*HARTREE2EV/BOHR)
+				
+				append = False
+				
+				# prepare input file for ml engine
+				data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
+				data1.dump(append=append)
+				QC.update_coord()
+		else:
+			QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
+			E_QC, G_QC = QC.calc_new()
+			
+			print('main.py 81 QC_coords0:', QC.coords*BOHR)
+			print('main.py 82 E_QC0:', E_QC*HARTREE2EV)
+			print('main.py 83 G_QC0:', G_QC*HARTREE2EV/BOHR)
+			
+			append = False
+			
+			# prepare input file for ml engine
+			data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
+			data1.dump(append=append)
 
 		# loop starts here
 		consistensy = False

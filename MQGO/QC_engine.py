@@ -55,7 +55,7 @@ class PySCF(): # moleclue is the Mole object of gto module
                 self.setting[key] = None
 
         # read xyz file
-        self.atoms_num, self.atom_symbol, self.atoms = read_xyz(xyz_path)
+        self.atoms_num, self.atom_symbol, self.atoms = read_xyz(xyz_path, output='pyscf')
         
         # build mol object
         self.mol = gto.Mole(atom=self.atoms, 
