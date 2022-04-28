@@ -6,15 +6,16 @@ from pyscf.data.nist import BOHR
 from MQGO.data import read_xyz
 
 class QCEngine(): 
-    def __init__(self, qc_engine=None, xyz_path=None, **setting):
+    def __init__(self, qc_engine=None, xyz_path=None, geom_index=None, **setting):
 
         assert qc_engine is not None, 'Please specify which QC engine to use.'
         assert xyz_path is not None, 'Please specify the path of xyz file.'
         assert setting is not None, 'Please specify settings for QC calcualations.'
 
-        self.qc_engine = qc_engine
-        self.xyz_path  = xyz_path
-        self.setting   = setting
+        self.qc_engine  = qc_engine
+        self.xyz_path   = xyz_path
+        self.setting    = setting
+        self.geom_index = geom_index
 
     def build(self):
         if self.qc_engine is None or self.qc_engine.lower() == 'pyscf':
@@ -24,7 +25,7 @@ class QCEngine():
         elif self.qc_engine.lower() == 'vasp':
             engine = VASP
 
-        return engine(xyz_path=self.xyz_path, **self.setting)
+        return engine(xyz_path=self.xyz_path, geom_index=self.geom_index, **self.setting)
     
 
 class PySCF(): # moleclue is the Mole object of gto module
@@ -33,7 +34,7 @@ class PySCF(): # moleclue is the Mole object of gto module
         qcengine = PySCF(xyz_path='xxx', a=xxx, b=xxx,...)
         energy, force = qcengine.calc_new()   
     '''
-    def __init__(self, xyz_path=None, **setting):
+    def __init__(self, xyz_path=None, geom_index=None, **setting):
         # from pyscf import gto  
         assert xyz_path is not None, "Can not find the xyz file"
         self.keys = []
@@ -55,7 +56,14 @@ class PySCF(): # moleclue is the Mole object of gto module
                 self.setting[key] = None
 
         # read xyz file
-        self.atoms_num, self.atom_symbol, self.atoms = read_xyz(xyz_path, output='pyscf')
+        if geom_index is None:
+            index = -1
+        elif geom_index == 0:
+            index = -1 # always read one geometry here
+        else:
+            index = geom_index
+        # always read one geometry and build mol according to the given index
+        self.atoms_num, self.atom_symbol, self.atoms = read_xyz(xyz_path, index=index, output='pyscf') 
         
         # build mol object
         self.mol = gto.Mole(atom=self.atoms, 
@@ -74,7 +82,7 @@ class PySCF(): # moleclue is the Mole object of gto module
         # check setting
         scf_basic_keys = ['xc', 'restricted'] # key restricted is bool
         scf_advance_keys = ['conv_tol', 'max_cycle', 'verbose', 'grids.level', 'dm0']
-        scf_default_dict = {'conv_tol':1e-12, 'max_cycle':100, 'verbose':0, 'grids.level':3, 'dm0':None}
+        scf_default_dict = {'conv_tol':1e-12, 'max_cycle':500, 'verbose':0, 'grids.level':3, 'dm0':None}
         for key in scf_basic_keys:
             assert key in self.keys, "Keyword '%s' mmust be specified, please check setting."%(key)
 
@@ -122,7 +130,7 @@ class PySCF(): # moleclue is the Mole object of gto module
 
         return self.e_tot, self.force
 
-    def update_coord(self, new_coord):
+    def update_coord(self, new_coord): # coordinates in a.u.
         self.mol = self.mol.set_geom_(new_coord)
         self.coords = self.mol.atom_coords()
         # print('QC_engine.py 118:', self.mol.atom_coords()*BOHR)
