@@ -3,8 +3,6 @@
 import os
 import logging
 
-from zmq import PLAIN_PASSWORD
-
 logger = logging.getLogger(__name__)
 
 from MQGO import data, QC_engine, ML_engine, optimizer
@@ -81,44 +79,33 @@ class MLgeomopt():
 			self.max_opt_cycle = 100
 		if self.opt_conv is None:
 			self.opt_conv = 0.00045 #* HARTREE2EV / BOHR # 0.00045 is from Gaussian
-		if self.geom_opt_index is None:
-			self.geom_opt_index = 1 # optimize the first geometry as default
+		if self.target_geom is None:
+			self.target_geom = 1 # optimize the first geometry as default
 
 		if self.have_init_qc_data is True:
-			logger.info('Initial QC data exists, preparation of initial QC data will be skipped')	
-			pass
+			logger.info('Initial QC data exists, preparation of initial QC data will be skipped')	 
+			QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, geom_index= 1, **self.qcsetting).build()	
 		else:
 			# prepare initail QC refernce data
 			# get basic information of the input xyz file
 			atom_num, atom_symbol, coords = data.read_xyz(self.xyz_path, index=0, output='regular')
 			geom_num = len(atom_num)
 			append = False
+
 			for index in range(0, geom_num):  # need to be finalized
-				QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, geom_index=index, **self.qcsetting).build()	
+				QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, geom_index=index + 1, **self.qcsetting).build()	
 				E_QC, G_QC = QC.calc_new()
-				
+
 				# prepare input files for ml engine
 				data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
 				data1.dump(append=append)
-				QC.update_coord()
-				append = True
-
-			# 	QC = QC_engine.QCEngine(qc_engine=self.qc_engine, xyz_path=self.xyz_path, **self.qcsetting).build()	
-			# 	E_QC, G_QC = QC.calc_new()
 				
-			# 	print('main.py 81 QC_coords0:', QC.coords*BOHR)
-			# 	print('main.py 82 E_QC0:', E_QC*HARTREE2EV)
-			# 	print('main.py 83 G_QC0:', G_QC*HARTREE2EV/BOHR)
-				
-			# 	append = False
-				
-			# 	# prepare input file for ml engine
-			# 	data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
-			# 	data1.dump(append=append)
+		
+			QC.update_coord(coords[self.target_geom - 1] / BOHR)
+		append = True
 
 		# loop starts here
 		consistensy = False
-		append = True
 		iter = 1
 		while (not consistensy) and (iter < self.max_opt_cycle):
 			print('''

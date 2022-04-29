@@ -36,6 +36,7 @@ class Optimizer():
         self.force_opt   = None
         self.conv_tol    = None
         self.global_temp = None
+        self.target_geom = 0 # optimize the first geometry as defaut
 
 
     def ase_read_xyz(self): # Build 'Atoms'object from xyz file, a xyz file may contain multiple geometries
@@ -43,7 +44,7 @@ class Optimizer():
         For current implementation, each geometry is read/written in a single xyz file, an aternative way
         is to write all geometries in one file.
         '''
-        atoms_obj = read(self.xyz_path)
+        atoms_obj = read(self.xyz_path, index=self.target_geom)
         return atoms_obj
 
     def ase_write_xyz(self, atom_obj):
@@ -78,7 +79,7 @@ class Optimizer():
             if self.global_temp is None:
                 self.global_temp = 100
 
-        _atoms = self.ase_read_xyz()
+        _atoms = self.ase_read_xyz()   # should be able to choose the geometry to optimize 2022/4/29
         print('optimizer.py 77:', _atoms.get_positions())
         if ml_engine.lower() == 'deepmd':
             from deepmd.calculator import DP
@@ -86,12 +87,12 @@ class Optimizer():
 
         if opt_global is not True:
             # local optimization
-            opt = optimizer_(_atoms)
+            opt = optimizer_(_atoms) 
             opt.run(fmax=self.conv_tol)
             
         else:
             # global optimization
-            from ase.units import kB           # need further tset 3/15/2022
+            from ase.units import kB           # need further test 3/15/2022
             opt = optimizer_(atoms=_atoms,           # the system to optimize
                   temperature=self.global_temp * kB, # 'temperature' to overcome barriers
                   dr=0.5,                            # maximal stepwidth

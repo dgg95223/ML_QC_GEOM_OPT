@@ -32,11 +32,12 @@ class DeePMD():
         assert compress.returncode == 0, 'An error occurred during compressing process.'
 
     def clear_temp(self):
-        subprocess.run('rm *.pb; rm *.meta; rm *.index', shell=True)
+        subprocess.run('rm *.meta; rm *.index', shell=True)
 
     def run(self):
 
         self.training()
         self.freeze()
         self.compress()
+        self.clear_temp()
 
