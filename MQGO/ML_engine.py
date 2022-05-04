@@ -32,7 +32,7 @@ class DeePMD():
         assert compress.returncode == 0, 'An error occurred during compressing process.'
 
     def clear_temp(self):
-        subprocess.run('rm *.meta; rm *.index', shell=True)
+        subprocess.run('rm moldel.ckpt*; rm checkpoint; rm -r model-compression', shell=True)
 
     def run(self):
 
