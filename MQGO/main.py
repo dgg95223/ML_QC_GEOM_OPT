@@ -99,7 +99,6 @@ class MLgeomopt():
 				# prepare input files for ml engine
 				data1 = data.Data(self.qc_engine, self.ml_engine, self.work_path).build(QC)
 				data1.dump(append=append)
-				print(append)
 				append = True
 		
 			QC.update_coord(coords[self.target_geom - 1] / BOHR)
