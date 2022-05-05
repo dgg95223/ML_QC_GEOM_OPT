@@ -79,7 +79,8 @@ class Optimizer():
             if self.global_temp is None:
                 self.global_temp = 100
 
-        _atoms = self.ase_read_xyz()   # should be able to choose the geometry to optimize 2022/4/29
+        _atoms = self.ase_read_xyz()   # should be able to choose the geometry to optimize 2022/4/29  can generate a temp xyz with ase.write
+
         print('optimizer.py 77:', _atoms.get_positions())
         if ml_engine.lower() == 'deepmd':
             from deepmd.calculator import DP
