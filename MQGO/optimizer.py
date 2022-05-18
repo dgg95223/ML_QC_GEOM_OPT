@@ -44,7 +44,7 @@ class Optimizer():
             index = -1
 
         atom_num, atom_symbol, atom_coord = read_xyz(self.xyz_path, index=index, output='pyscf')
-        with open('./_temp.xyz', 'r') as temp:
+        with open('./_temp.xyz', 'w+') as temp:
             temp.write(str(atom_num)+'\n')
             temp.write('\n')
             temp.write(atom_coord)
