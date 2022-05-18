@@ -1,7 +1,8 @@
 '''Geometry optimization module of ASE'''
 
+import subprocess
 from ase.io import read, write
-from MQGO.data import xyz_write_check
+from MQGO.data import xyz_write_check, read_xyz
 
 class Optimizer():
     def __init__(self, xyz_path=None, work_path=None, ml_engine=None, outter_cycle=None, algorithm=None, max_opt_cycle=None):
@@ -38,13 +39,30 @@ class Optimizer():
         self.global_temp = None
         self.target_geom = 0 # optimize the first geometry as defaut
 
+    def ase_read_any_xyz(self, index=None):
+        if index is None:
+            index = -1
 
-    def ase_read_xyz(self): # Build 'Atoms'object from xyz file, a xyz file may contain multiple geometries
+        atom_num, atom_symbol, atom_coord = read_xyz(self.xyz_path, index=index, output='pyscf')
+        with open('./_temp.xyz', 'r') as temp:
+            temp.write(str(atom_num)+'\n')
+            temp.write('\n')
+            temp.write(atom_coord)
+        
+        _atoms = self.ase_read_xyz('./_temp.xyz')
+        subprocess.run('rm ./_temp.xyz', shell=True)
+        return _atoms
+
+    def ase_read_xyz(self, xyz_file=None): # Build 'Atoms'object from xyz file, a xyz file may contain multiple geometries
         ''' ASE's Atoms object usage: https://wiki.fysik.dtu.dk/ase/ase/atoms.html
         For current implementation, each geometry is read/written in a single xyz file, an aternative way
         is to write all geometries in one file.
         '''
-        atoms_obj = read(self.xyz_path, index=self.target_geom)
+        if xyz_file is None:
+            xyz_file = self.xyz_file
+        else:
+            pass
+        atoms_obj = read(xyz_file, index=self.target_geom)
         return atoms_obj
 
     def ase_write_xyz(self, atom_obj):
@@ -79,7 +97,7 @@ class Optimizer():
             if self.global_temp is None:
                 self.global_temp = 100
 
-        _atoms = self.ase_read_xyz()   # should be able to choose the geometry to optimize 2022/4/29  can generate a temp xyz with ase.write
+        _atoms = self.ase_read_any_xyz()   # choose any geometry to optimize , the default is the last geometry in the xyz file
 
         print('optimizer.py 77:', _atoms.get_positions())
         if ml_engine.lower() == 'deepmd':
@@ -93,14 +111,13 @@ class Optimizer():
             
         else:
             # global optimization
-            from ase.units import kB           # need further test 3/15/2022
+            from ase.units import kB                 # need further test 3/15/2022
             opt = optimizer_(atoms=_atoms,           # the system to optimize
                   temperature=self.global_temp * kB, # 'temperature' to overcome barriers
                   dr=0.5,                            # maximal stepwidth
-                  optimizer=LBFGS,              # optimizer to find local minima
+                  optimizer=LBFGS,                   # optimizer to find local minima
                   fmax=self.conv_tol,                # maximal force for the optimizer
                   )
-
 
         self.ase_write_xyz(_atoms)
         self.geom_opt  = _atoms.get_positions()

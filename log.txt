@@ -60,3 +60,16 @@ Probable reasons: 1. During the training process, only the energy data was train
                   2. Due to the lack of data, the NN may overfit the data. Additional treat should 
                     be applied.
                   3. Changing the loss function from exp to tanh maybe worth a try.
+
+############################################################################################
+5/1
+Memo:
+Optimization for water dimer with a small initial training set of 3 geometries has been tested.
+The ML-optimizied geometry is almost the same the QC-optimized geometry and the energy difference is 
+less than 0.1 eV. The training parameters which are 6000 of total training steps and the learning 
+rate decay every 5000 steps work the best for this perticular situation. Further test of other system
+with different initial geometries should be done as the next step.
+
+############################################################################################
+5/3
+Memo:

@@ -48,7 +48,7 @@
         "data_stat_protect": 0.01,
         "compress": {
             "model_file": "graph.pb",
-            "min_nbor_dist": 0.8433888331887975,
+            "min_nbor_dist": 0.06547143520646447,
             "table_config": [
                 5,
                 0.01,
@@ -61,7 +61,7 @@
     "learning_rate": {
         "type": "exp",
         "decay_steps": 5000,
-        "start_lr": 0.001,
+        "start_lr": 0.005,
         "stop_lr": 3.51e-08,
         "scale_by_worker": "linear"
     },
@@ -88,7 +88,7 @@
             "auto_prob": "prob_sys_size",
             "sys_probs": null
         },
-        "numb_steps": 6000,
+        "numb_steps": 20000,
         "seed": 10,
         "disp_file": "lcurve.out",
         "disp_freq": 100,
