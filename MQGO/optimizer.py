@@ -41,7 +41,7 @@ class Optimizer():
 
     def ase_read_any_xyz(self, index=None):
         if index is None:
-            index = -1
+            index = 1
 
         atom_num, atom_symbol, atom_coord = read_xyz(self.xyz_path, index=index, output='pyscf')
         with open('./_temp.xyz', 'w+') as temp:
